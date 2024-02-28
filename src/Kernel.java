@@ -19,17 +19,19 @@ public class Kernel implements Stoppable, Runnable {
     return thread;
   }
 
+  private void startupCreateProcess() {
+    UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
+    processCreator.init();
+    processCreator.start();
+    OS.setRetValOnOS(1);
+  }
+
   @Override
   public void run() {
     stop();
     OS.CallType ct = OS.getCallType();
     switch (ct) {
-      case OS.CallType.STARTUP_CREATE_PROCESS -> {
-        UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
-        processCreator.init();
-        processCreator.start();
-        OS.setRetValOnOS(1);
-      }
+      case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
     }
     OS.stopKernel();
   }

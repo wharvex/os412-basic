@@ -20,9 +20,15 @@ public class OS {
     getKernel().init();
 
     // Create the ProcessCreator process; switch to it; return its pid.
-    return startupCreateProcess(cs, new ProcessCreator());
+    return startupCreateProcess(cs, new ProcessCreator(), PriorityType.REALTIME);
   }
 
+  /**
+   * Use Objects.requireNonNull for this method and other getters and setters on OS because OS has
+   * no constructor and therefore more null danger.
+   *
+   * @return the kernel, duh
+   */
   private static Kernel getKernel() {
     Objects.requireNonNull(kernel, "Tried to get OS.kernel but it was null.");
     return kernel;
@@ -30,7 +36,8 @@ public class OS {
 
   public static void sleep(ContextSwitcher cs, long sleepLenInMillis) {}
 
-  public static int startupCreateProcess(ContextSwitcher cs, UserlandProcess processCreator) {
+  public static int startupCreateProcess(
+      ContextSwitcher cs, UserlandProcess processCreator, PriorityType pt) {
     switchContext(cs, CallType.STARTUP_CREATE_PROCESS, processCreator);
     return (int)
         getRetVal()
