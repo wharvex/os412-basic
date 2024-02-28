@@ -11,6 +11,10 @@ public interface Stoppable {
     return getThread().getName();
   }
 
+  default Thread.State getThreadState() {
+    return getThread().getState();
+  }
+
   default void stop() {
     if (Thread.currentThread() != getThread()) {
       throw new RuntimeException(

@@ -4,7 +4,7 @@ public class Output {
   }
 
   public static void print(String printStr) {
-    System.out.println("\nOUTPUT: " + printStr + ".");
+    System.out.println("\n*** OUTPUT: " + printStr + ". ***");
   }
 
   public static void errorPrint(String printStr) {

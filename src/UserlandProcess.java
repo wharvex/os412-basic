@@ -39,6 +39,7 @@ public abstract class UserlandProcess implements Runnable, ContextSwitcher {
 
   @Override
   public void run() {
+    Output.debugPrint(getThreadName() + " initting now");
     stop();
     main();
   }

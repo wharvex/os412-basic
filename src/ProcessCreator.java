@@ -9,8 +9,16 @@ public class ProcessCreator extends UserlandProcess {
     while (true) {
       Output.print("Hello from ProcessCreator. Times printed: " + (++i));
       Output.debugPrint(
-          "Bootloader thread state: " + ThreadHelper.getThreadStateString("bootloaderThread"));
-      Output.debugPrint("Bootloader isDone: " + OS.getContextSwitcher().isDone());
+          "View from ProcessCreator -- Bootloader thread is "
+              + ThreadHelper.getThreadStateString("bootloaderThread"));
+      Output.debugPrint(
+          "View from ProcessCreator -- Bootloader isDone? " + OS.getContextSwitcher().isDone());
+      Output.debugPrint(
+          "View from ProcessCreator -- Main thread is "
+              + ThreadHelper.getThreadStateString("mainThread"));
+      Output.debugPrint(
+          "View from ProcessCreator -- Kernel thread is "
+              + ThreadHelper.getThreadStateString("kernelThread"));
       ThreadHelper.threadSleep(1000);
     }
   }

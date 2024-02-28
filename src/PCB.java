@@ -1,21 +1,30 @@
 import java.time.Instant;
 import java.util.Optional;
 
+/** Process Control Block */
 public class PCB {
 
   private static int nextPid = 0;
   private final UserlandProcess userlandProcess;
   private final int pid;
   private PriorityType priorityType;
+
+  // The Instant before which we should not wake up this PCB if it is sleeping.
+
   private Instant wakeupAfter;
+
+  // How many times the Timer has stopped this PCB.
+
   private int timeoutsCounter;
 
   public PCB(UserlandProcess up, PriorityType pt) {
-    this.userlandProcess = up;
-    this.priorityType = pt;
-    // For each new PCB, it gets the current nextPid and increments nextPid for the next PCB.
-    this.pid = PCB.nextPid++;
-    this.timeoutsCounter = 0;
+    userlandProcess = up;
+    priorityType = pt;
+
+    // For a new PCB, we set pid to the current nextPid and then increment nextPid for the next PCB.
+    pid = PCB.nextPid++;
+
+    timeoutsCounter = 0;
   }
 
   public int getTimeoutsCounter() {
@@ -27,11 +36,11 @@ public class PCB {
   }
 
   public String getThreadName() {
-    return this.getUserlandProcess().getThread().getName();
+    return getUserlandProcess().getThreadName();
   }
 
   public Thread.State getThreadState() {
-    return this.getUserlandProcess().getThread().getState();
+    return getUserlandProcess().getThreadState();
   }
 
   /**
@@ -62,15 +71,15 @@ public class PCB {
 
   /** Only the Timer thread should use this method. */
   public void stop() {
-    this.getUserlandProcess().requestStop();
-    this.incrementTimeoutsCounter();
+    getUserlandProcess().requestStop();
+    incrementTimeoutsCounter();
   }
 
   /** Only called by timer thread. */
   private void incrementTimeoutsCounter() {
-    this.setTimeoutsCounter(this.getTimeoutsCounter() + 1);
-    if (this.getTimeoutsCounter() > 4) {
-      this.demote();
+    setTimeoutsCounter(getTimeoutsCounter() + 1);
+    if (getTimeoutsCounter() > 4) {
+      demote();
     }
   }
 
@@ -79,17 +88,22 @@ public class PCB {
   }
 
   private void demote() {
-    if (this.getPriorityType() == PriorityType.REALTIME) {
-      this.setPriorityType(PriorityType.INTERACTIVE);
-    } else if (this.getPriorityType() == PriorityType.INTERACTIVE) {
-      this.setPriorityType(PriorityType.BACKGROUND);
+    if (getPriorityType() == PriorityType.REALTIME) {
+      setPriorityType(PriorityType.INTERACTIVE);
+    } else if (getPriorityType() == PriorityType.INTERACTIVE) {
+      setPriorityType(PriorityType.BACKGROUND);
     }
   }
 
   public void start() {
-    this.getUserlandProcess().start();
+    getUserlandProcess().start();
   }
 
+  /**
+   * TODO: What does it mean if this is null?
+   *
+   * @return
+   */
   public Optional<Instant> getWakeupAfter() {
     return Optional.ofNullable(wakeupAfter);
   }
@@ -99,6 +113,6 @@ public class PCB {
   }
 
   public void resetTimeoutsCounter() {
-    this.setTimeoutsCounter(0);
+    setTimeoutsCounter(0);
   }
 }

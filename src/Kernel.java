@@ -28,6 +28,7 @@ public class Kernel implements Stoppable, Runnable {
 
   @Override
   public void run() {
+    Output.debugPrint(getThreadName() + " initting now");
     stop();
     OS.CallType ct = OS.getCallType();
     switch (ct) {
