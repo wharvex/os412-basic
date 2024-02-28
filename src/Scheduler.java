@@ -3,7 +3,11 @@ import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/** Models an operating system process scheduler. */
+/**
+ * KERNELLAND
+ *
+ * <p>Models an operating system process scheduler.
+ */
 public class Scheduler {
 
   // The priority-appropriate waiting queues.

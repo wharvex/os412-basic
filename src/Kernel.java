@@ -1,5 +1,6 @@
 import java.util.concurrent.Semaphore;
 
+/** KERNELLAND */
 public class Kernel implements Stoppable, Runnable {
   private final Semaphore semaphore;
   private final Thread thread;
@@ -29,11 +30,12 @@ public class Kernel implements Stoppable, Runnable {
   @Override
   public void run() {
     Output.debugPrint(getThreadName() + " initting now");
-    stop();
-    OS.CallType ct = OS.getCallType();
-    switch (ct) {
-      case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
+    while (true) {
+      stop();
+      switch (OS.getCallType()) {
+        case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
+      }
+      OS.startContextSwitcher();
     }
-    OS.stopKernel();
   }
 }

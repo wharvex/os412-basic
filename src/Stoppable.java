@@ -1,5 +1,6 @@
 import java.util.concurrent.Semaphore;
 
+/** MAINLAND */
 public interface Stoppable {
 
   default void init() {

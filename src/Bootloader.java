@@ -2,7 +2,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-public class Bootloader implements ContextSwitcher, Runnable {
+/** MAINLAND */
+public class Bootloader implements UnprivilegedContextSwitcher, Runnable {
   private final Semaphore semaphore;
   private final Thread thread;
   private final List<Object> csRets;

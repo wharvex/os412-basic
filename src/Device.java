@@ -1,3 +1,4 @@
+/** KERNELLAND */
 public interface Device {
   int Open(String s);
 

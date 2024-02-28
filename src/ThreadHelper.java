@@ -10,7 +10,7 @@ public class ThreadHelper {
   }
 
   public static String getThreadStateString(String threadName) {
-    return getThreadByName(threadName).map(t -> t.getState().toString()).orElse("no thread");
+    return getThreadByName(threadName).map(t -> t.getState().toString()).orElse("non-existent");
   }
 
   public static void printAllThreads() {

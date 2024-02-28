@@ -1,13 +1,17 @@
 import java.time.Instant;
 import java.util.Optional;
 
-/** Process Control Block */
+/**
+ * KERNELLAND
+ *
+ * <p>Process Control Block
+ */
 public class PCB {
 
   private static int nextPid = 0;
   private final UserlandProcess userlandProcess;
   private final int pid;
-  private PriorityType priorityType;
+  private OS.PriorityType priorityType;
 
   // The Instant before which we should not wake up this PCB if it is sleeping.
 
@@ -17,7 +21,7 @@ public class PCB {
 
   private int timeoutsCounter;
 
-  public PCB(UserlandProcess up, PriorityType pt) {
+  public PCB(UserlandProcess up, OS.PriorityType pt) {
     userlandProcess = up;
     priorityType = pt;
 
@@ -48,7 +52,7 @@ public class PCB {
    *
    * @return
    */
-  public synchronized PriorityType getPriorityType() {
+  public synchronized OS.PriorityType getPriorityType() {
     return priorityType;
   }
 
@@ -57,7 +61,7 @@ public class PCB {
    *
    * @param priorityType
    */
-  public synchronized void setPriorityType(PriorityType priorityType) {
+  public synchronized void setPriorityType(OS.PriorityType priorityType) {
     this.priorityType = priorityType;
   }
 
@@ -88,10 +92,10 @@ public class PCB {
   }
 
   private void demote() {
-    if (getPriorityType() == PriorityType.REALTIME) {
-      setPriorityType(PriorityType.INTERACTIVE);
-    } else if (getPriorityType() == PriorityType.INTERACTIVE) {
-      setPriorityType(PriorityType.BACKGROUND);
+    if (getPriorityType() == OS.PriorityType.REALTIME) {
+      setPriorityType(OS.PriorityType.INTERACTIVE);
+    } else if (getPriorityType() == OS.PriorityType.INTERACTIVE) {
+      setPriorityType(OS.PriorityType.BACKGROUND);
     }
   }
 

@@ -1,10 +1,14 @@
 import java.util.*;
 
-/** Models the gateway between userland and kernelland. */
+/**
+ * OSLAND
+ *
+ * <p>Models the gateway between userland and kernelland.
+ */
 public class OS {
   private static final List<Object> params = new ArrayList<>();
   private static Kernel kernel;
-  private static ContextSwitcher contextSwitcher;
+  private static UnprivilegedContextSwitcher contextSwitcher;
   private static Object retVal;
   private static CallType callType;
 
@@ -14,7 +18,7 @@ public class OS {
    * @param cs
    * @return
    */
-  public static int startup(ContextSwitcher cs) {
+  public static int startup(UnprivilegedContextSwitcher cs) {
     // Create Kernel and start its thread.
     kernel = new Kernel();
     getKernel().init();
@@ -34,10 +38,10 @@ public class OS {
     return kernel;
   }
 
-  public static void sleep(ContextSwitcher cs, long sleepLenInMillis) {}
+  public static void sleep(UnprivilegedContextSwitcher cs, long sleepLenInMillis) {}
 
   public static int startupCreateProcess(
-      ContextSwitcher cs, UserlandProcess processCreator, PriorityType pt) {
+      UnprivilegedContextSwitcher cs, UserlandProcess processCreator, PriorityType pt) {
     switchContext(cs, CallType.STARTUP_CREATE_PROCESS, processCreator);
     return (int)
         getRetVal()
@@ -58,7 +62,7 @@ public class OS {
    * @param params
    */
   public static synchronized void switchContext(
-      ContextSwitcher cs, CallType callType, Object... params) {
+      UnprivilegedContextSwitcher cs, CallType callType, Object... params) {
     // Store a reference on OS to the Runnable whose thread is calling this method.
     setContextSwitcher(cs);
 
@@ -120,10 +124,13 @@ public class OS {
     getContextSwitcher().stop();
   }
 
+  public static void startKernelOnly() {
+    getKernel().start();
+  }
+
   /** Only called by Kernel thread. */
-  public static void stopKernel() {
+  public static void startContextSwitcher() {
     getContextSwitcher().start();
-    getKernel().stop();
   }
 
   /**
@@ -135,13 +142,13 @@ public class OS {
     retVal = rv;
   }
 
-  public static ContextSwitcher getContextSwitcher() {
+  public static UnprivilegedContextSwitcher getContextSwitcher() {
     Objects.requireNonNull(
         contextSwitcher, Output.getErrorString("Tried to get OS.contextSwitcher but it was null"));
     return contextSwitcher;
   }
 
-  public static void setContextSwitcher(ContextSwitcher cs) {
+  public static void setContextSwitcher(UnprivilegedContextSwitcher cs) {
     Objects.requireNonNull(cs, Output.getErrorString("Cannot set OS.contextSwitcher to null"));
     contextSwitcher = cs;
   }
@@ -162,5 +169,11 @@ public class OS {
     CREATE_PROCESS,
     SWITCH_PROCESS,
     SLEEP
+  }
+
+  public enum PriorityType {
+    REALTIME,
+    INTERACTIVE,
+    BACKGROUND
   }
 }

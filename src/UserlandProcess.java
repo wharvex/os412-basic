@@ -2,7 +2,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-public abstract class UserlandProcess implements Runnable, ContextSwitcher {
+/** USERLAND */
+public abstract class UserlandProcess implements Runnable, UnprivilegedContextSwitcher {
   private final String debugPid;
   private final Semaphore semaphore;
   private final Thread thread;

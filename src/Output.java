@@ -1,3 +1,4 @@
+/** MAINLAND */
 public class Output {
   public static void debugPrint(String printStr) {
     System.out.println("\nDEBUG OUTPUT: " + printStr + ".");
