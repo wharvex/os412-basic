@@ -12,16 +12,15 @@ public class OS {
    * Only called by Bootloader thread.
    *
    * @param cs
-   * @param processCreator
    * @return
    */
-  public static int startup(ContextSwitcher cs, UserlandProcess processCreator) {
+  public static int startup(ContextSwitcher cs) {
     // Create Kernel and start its thread.
     kernel = new Kernel();
     getKernel().init();
 
     // Create the ProcessCreator process; switch to it; return its pid.
-    return startupCreateProcess(cs, processCreator);
+    return startupCreateProcess(cs, new ProcessCreator());
   }
 
   private static Kernel getKernel() {
@@ -32,7 +31,7 @@ public class OS {
   public static void sleep(ContextSwitcher cs, long sleepLenInMillis) {}
 
   public static int startupCreateProcess(ContextSwitcher cs, UserlandProcess processCreator) {
-    switchContext(cs, CallType.CREATE_PROCESS, processCreator);
+    switchContext(cs, CallType.STARTUP_CREATE_PROCESS, processCreator);
     return (int)
         getRetVal()
             .orElseThrow(() -> new RuntimeException("Expected int retVal from createProcess."));

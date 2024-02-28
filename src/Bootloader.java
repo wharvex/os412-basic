@@ -35,6 +35,6 @@ public class Bootloader implements ContextSwitcher, Runnable {
 
   @Override
   public void run() {
-    setContextSwitchRet(OS.startup(this, new ProcessCreator()));
+    setContextSwitchRet(OS.startup(this));
   }
 }

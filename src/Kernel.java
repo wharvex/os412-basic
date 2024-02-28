@@ -22,10 +22,15 @@ public class Kernel implements Stoppable, Runnable {
   @Override
   public void run() {
     stop();
-    UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
-    processCreator.init();
-    processCreator.start();
-    OS.setRetValOnOS(1);
+    OS.CallType ct = OS.getCallType();
+    switch (ct) {
+      case OS.CallType.STARTUP_CREATE_PROCESS -> {
+        UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
+        processCreator.init();
+        processCreator.start();
+        OS.setRetValOnOS(1);
+      }
+    }
     OS.stopKernel();
   }
 }
