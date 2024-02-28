@@ -11,7 +11,7 @@ public abstract class UserlandProcess implements Runnable, ContextSwitcher {
 
   public UserlandProcess(String debugPid, String threadNameBase) {
     this.debugPid = debugPid;
-    thread = new Thread(this, threadNameBase + "_" + debugPid);
+    thread = new Thread(this, threadNameBase + "Thread_" + debugPid);
     semaphore = new Semaphore(0);
     csRets = new ArrayList<>();
     stopRequested = false;
@@ -57,9 +57,5 @@ public abstract class UserlandProcess implements Runnable, ContextSwitcher {
   @Override
   public void csRetsAdd(Object ret) {
     csRets.add(ret);
-  }
-
-  public boolean isDone() {
-    return false;
   }
 }

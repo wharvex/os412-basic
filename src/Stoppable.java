@@ -3,6 +3,7 @@ import java.util.concurrent.Semaphore;
 public interface Stoppable {
 
   default void init() {
+    Output.debugPrint(Thread.currentThread().getName() + " initting " + getThreadName() + " now");
     getThread().start();
   }
 
@@ -12,12 +13,15 @@ public interface Stoppable {
 
   default void stop() {
     if (Thread.currentThread() != getThread()) {
-      throw new RuntimeException("Parking space reserved for " + getThreadName() + ".");
+      throw new RuntimeException(
+          Output.getErrorString("Parking space reserved for " + getThreadName()));
     }
     try {
+      Output.debugPrint(getThreadName() + " stopping now");
       getSemaphore().acquire();
+      Output.debugPrint(getThreadName() + " starting now");
     } catch (InterruptedException e) {
-      System.out.println(getThreadName() + " interrupted while parked at its semaphore.");
+      Output.errorPrint(getThreadName() + " interrupted while parked at its semaphore");
       Thread.currentThread().interrupt();
     }
   }
@@ -38,10 +42,18 @@ public interface Stoppable {
 
     // Ensure semaphore remains binary.
     if (getSemaphore().availablePermits() < 1) {
-      System.out.println("Releasing semaphore at which " + getThreadName() + " is parked.");
+      Output.debugPrint(
+          Thread.currentThread().getName()
+              + " releasing semaphore at which "
+              + getThreadName()
+              + " is parked now");
       getSemaphore().release();
     } else {
-      System.out.println("Semaphore for " + getThreadName() + " not released.");
+      Output.debugPrint(
+          "Semaphore for "
+              + getThreadName()
+              + " not released by "
+              + Thread.currentThread().getName());
     }
   }
 }

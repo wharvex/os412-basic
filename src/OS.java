@@ -41,7 +41,10 @@ public class OS {
     switchContext(cs, CallType.STARTUP_CREATE_PROCESS, processCreator);
     return (int)
         getRetVal()
-            .orElseThrow(() -> new RuntimeException("Expected int retVal from createProcess."));
+            .orElseThrow(
+                () ->
+                    new RuntimeException(
+                        Output.getErrorString("Expected int retVal from createProcess")));
   }
 
   /**
@@ -78,7 +81,7 @@ public class OS {
 
     // Check if any of the newParams are null.
     if (Arrays.stream(newParams).anyMatch(Objects::isNull)) {
-      throw new RuntimeException("Cannot add any null elements to params.");
+      throw new RuntimeException(Output.getErrorString("Cannot add any null elements to params."));
     }
 
     // Add new params to params.
@@ -93,10 +96,11 @@ public class OS {
    */
   public static Object getParam(int idx) {
     if (idx < 0 || idx >= params.size()) {
-      throw new RuntimeException("Param index " + idx + " out of range.");
+      throw new RuntimeException(Output.getErrorString("Param index " + idx + " out of range."));
     }
     Object param = params.get(idx);
-    Objects.requireNonNull(param, "Tried to get param at index " + idx + " but it was null.");
+    Objects.requireNonNull(
+        param, Output.getErrorString("Tried to get param at index " + idx + " but it was null."));
     return param;
   }
 
@@ -132,22 +136,24 @@ public class OS {
   }
 
   public static ContextSwitcher getContextSwitcher() {
-    Objects.requireNonNull(contextSwitcher, "Tried to get OS.contextSwitcher but it was null.");
+    Objects.requireNonNull(
+        contextSwitcher, Output.getErrorString("Tried to get OS.contextSwitcher but it was null"));
     return contextSwitcher;
   }
 
   public static void setContextSwitcher(ContextSwitcher cs) {
-    Objects.requireNonNull(cs, "Cannot set OS.contextSwitcher to null.");
+    Objects.requireNonNull(cs, Output.getErrorString("Cannot set OS.contextSwitcher to null"));
     contextSwitcher = cs;
   }
 
   public static CallType getCallType() {
-    Objects.requireNonNull(callType, "Tried to get OS.callType but it was null.");
+    Objects.requireNonNull(
+        callType, Output.getErrorString("Tried to get OS.callType but it was null"));
     return callType;
   }
 
   public static void setCallType(CallType ct) {
-    Objects.requireNonNull(ct, "Cannot set OS.callType to null.");
+    Objects.requireNonNull(ct, Output.getErrorString("Cannot set OS.callType to null."));
     callType = ct;
   }
 

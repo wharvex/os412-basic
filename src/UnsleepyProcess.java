@@ -9,10 +9,9 @@ public class UnsleepyProcess extends UserlandProcess {
   void main() {
     int i = 0;
     while (true) {
-      System.out.println(
-          "Hello from Unsleepy " + getDebugPid() + " (times printed: " + (++i) + ")");
+      Output.print("Hello from Unsleepy " + getDebugPid() + " (times printed: " + (++i) + ")");
       cooperate();
-      ThreadHelper.threadSleep(500);
+      ThreadHelper.threadSleep(1000);
     }
   }
 }

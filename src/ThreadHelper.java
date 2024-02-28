@@ -18,9 +18,9 @@ public class ThreadHelper {
         .keySet()
         .forEach(
             t -> {
-              System.out.println("Thread: " + t.getName());
-              System.out.println("Status: " + t.getState());
-              System.out.println("Stack trace: " + Arrays.toString(t.getStackTrace()));
+              Output.debugPrint("Thread: " + t.getName());
+              Output.debugPrint("Status: " + t.getState());
+              Output.debugPrint("Stack trace: " + Arrays.toString(t.getStackTrace()));
             });
   }
 

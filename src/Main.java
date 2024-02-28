@@ -1,6 +1,7 @@
 public class Main {
   public static void main(String[] args) {
-    var a = new Bootloader();
-    a.init();
+    Thread.currentThread().setName("mainThread");
+    var bl = new Bootloader();
+    bl.init();
   }
 }

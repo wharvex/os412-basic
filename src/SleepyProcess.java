@@ -9,7 +9,7 @@ public class SleepyProcess extends UserlandProcess {
   void main() {
     int i = 0;
     while (true) {
-      System.out.println("Hello from Sleepy " + getDebugPid() + " (times printed: " + (++i) + ")");
+      Output.print("Hello from Sleepy " + getDebugPid() + " (times printed: " + (++i) + ")");
       OS.sleep(this, 500);
       cooperate();
     }

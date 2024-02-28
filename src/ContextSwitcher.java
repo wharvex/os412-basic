@@ -15,4 +15,8 @@ public interface ContextSwitcher extends Stoppable {
   }
 
   void csRetsAdd(Object ret);
+
+  default boolean isDone() {
+    return !getThread().isAlive();
+  }
 }

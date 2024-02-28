@@ -7,9 +7,10 @@ public class ProcessCreator extends UserlandProcess {
   void main() {
     int i = 0;
     while (true) {
-      System.out.println("Hello from ProcessCreator. Times printed: " + (++i));
-      System.out.println(
+      Output.print("Hello from ProcessCreator. Times printed: " + (++i));
+      Output.debugPrint(
           "Bootloader thread state: " + ThreadHelper.getThreadStateString("bootloaderThread"));
+      Output.debugPrint("Bootloader isDone: " + OS.getContextSwitcher().isDone());
       ThreadHelper.threadSleep(1000);
     }
   }
