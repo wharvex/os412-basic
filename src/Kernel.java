@@ -1,6 +1,6 @@
 import java.util.concurrent.Semaphore;
 
-public class Kernel implements IStoppable, Runnable {
+public class Kernel implements Stoppable, Runnable {
   private final Semaphore semaphore;
   private final Thread thread;
 
@@ -11,14 +11,21 @@ public class Kernel implements IStoppable, Runnable {
 
   @Override
   public Semaphore getSemaphore() {
-    return null;
+    return semaphore;
   }
 
   @Override
   public Thread getThread() {
-    return null;
+    return thread;
   }
 
   @Override
-  public void run() {}
+  public void run() {
+    stop();
+    UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
+    processCreator.init();
+    processCreator.start();
+    OS.setRetValOnOS(1);
+    OS.stopKernel();
+  }
 }

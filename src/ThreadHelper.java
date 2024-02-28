@@ -1,12 +1,12 @@
 import java.util.Arrays;
-import java.util.Optional;
 
 public class ThreadHelper {
 
-  public static Optional<Thread> getThreadByName(String threadName) {
+  public static Thread getThreadByName(String threadName) {
     return Thread.getAllStackTraces().keySet().stream()
         .filter(t -> t.getName().equals(threadName))
-        .findFirst();
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("Thread " + threadName + " not found."));
   }
 
   public static void printAllThreads() {

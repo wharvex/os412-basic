@@ -1,12 +1,11 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Semaphore;
 
-public class Bootloader implements ISwitchable, Runnable {
+public class Bootloader implements ContextSwitcher, Runnable {
   private final Semaphore semaphore;
   private final Thread thread;
-  private final List<AbsContextSwitchRet> csRets;
+  private final List<Object> csRets;
 
   public Bootloader() {
     semaphore = new Semaphore(0);
@@ -25,19 +24,17 @@ public class Bootloader implements ISwitchable, Runnable {
   }
 
   @Override
-  public AbsContextSwitchRet getContextSwitchRet(int idx) {
+  public Object csRetsGet(int idx) {
     return csRets.get(idx);
   }
 
   @Override
-  public void setContextSwitchRet(AbsContextSwitchRet ret) {
-    Objects.requireNonNull(
-        ret, "Null Context Switch Returns not allowed in the Bootloader's CSR list.");
+  public void csRetsAdd(Object ret) {
     csRets.add(ret);
   }
 
   @Override
   public void run() {
-    OS.startup(this, new ProcessCreator(), new SleepyProcess(), new UnsleepyProcess());
+    setContextSwitchRet(OS.startup(this, new ProcessCreator()));
   }
 }

@@ -4,5 +4,7 @@ public class ProcessCreator extends UserlandProcess {
   }
 
   @Override
-  void main() {}
+  void main() {
+    System.out.println("Hello from ProcessCreator");
+  }
 }
