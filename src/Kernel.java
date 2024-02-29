@@ -4,10 +4,12 @@ import java.util.concurrent.Semaphore;
 public class Kernel implements Stoppable, Runnable {
   private final Semaphore semaphore;
   private final Thread thread;
+  private final Scheduler scheduler;
 
   public Kernel() {
     semaphore = new Semaphore(0);
     thread = new Thread(this, "kernelThread");
+    scheduler = new Scheduler();
   }
 
   @Override
@@ -22,9 +24,12 @@ public class Kernel implements Stoppable, Runnable {
 
   private void startupCreateProcess() {
     UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
+    OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
     processCreator.init();
     processCreator.start();
     OS.setRetValOnOS(1);
+    getScheduler().setCurrentlyRunning(new PCB(processCreator, pt));
+    getScheduler().startTimer();
   }
 
   @Override
@@ -37,5 +42,9 @@ public class Kernel implements Stoppable, Runnable {
       }
       OS.startContextSwitcher();
     }
+  }
+
+  public Scheduler getScheduler() {
+    return scheduler;
   }
 }

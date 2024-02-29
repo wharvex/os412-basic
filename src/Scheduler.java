@@ -43,20 +43,28 @@ public class Scheduler {
     this.hiddenQueue = new ArrayList<>();
   }
 
-  public Optional<PCB> getCurrentlyRunning() {
+  public synchronized Optional<PCB> getCurrentlyRunning() {
     return Optional.ofNullable(currentlyRunning);
   }
 
-  public void setCurrentlyRunning(PCB currentlyRunning) {
+  public synchronized void setCurrentlyRunning(PCB currentlyRunning) {
     this.currentlyRunning = currentlyRunning;
   }
 
-  private void startTimer() {
+  public void startTimer() {
     this.timer.schedule(
         new TimerTask() {
           @Override
           public void run() {
-            getCurrentlyRunning().ifPresent(PCB::stop);
+            Output.debugPrint(Thread.currentThread().getName() + " is running");
+            getCurrentlyRunning()
+                .ifPresentOrElse(
+                    cr ->
+                        Output.debugPrint(
+                            Thread.currentThread().getName() + " found currentlyRunning"),
+                    () ->
+                        Output.debugPrint(
+                            Thread.currentThread().getName() + " did not find currentlyRunning"));
           }
         },
         1000,

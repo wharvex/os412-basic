@@ -42,7 +42,7 @@ public class OS {
 
   public static int startupCreateProcess(
       UnprivilegedContextSwitcher cs, UserlandProcess processCreator, PriorityType pt) {
-    switchContext(cs, CallType.STARTUP_CREATE_PROCESS, processCreator);
+    switchContextAntechamber(cs, CallType.STARTUP_CREATE_PROCESS, processCreator, pt);
     return (int)
         getRetVal()
             .orElseThrow(
@@ -63,6 +63,9 @@ public class OS {
    */
   public static synchronized void switchContext(
       UnprivilegedContextSwitcher cs, CallType callType, Object... params) {
+    // Announce our arrival.
+    Output.debugPrint(Thread.currentThread().getName() + " just entered switchContext");
+
     // Store a reference on OS to the Runnable whose thread is calling this method.
     setContextSwitcher(cs);
 
@@ -131,6 +134,13 @@ public class OS {
   /** Only called by Kernel thread. */
   public static void startContextSwitcher() {
     getContextSwitcher().start();
+  }
+
+  /** Where you take off your coat and wait to be let into the switchContext method. */
+  public static void switchContextAntechamber(
+      UnprivilegedContextSwitcher ucs, CallType callType, Object... params) {
+    Output.debugPrint(Thread.currentThread().getName() + " is about to enter switchContext");
+    switchContext(ucs, callType, params);
   }
 
   /**

@@ -20,6 +20,9 @@ public class ProcessCreator extends UserlandProcess {
       Output.debugPrint(
           "View from ProcessCreator -- Kernel thread is "
               + ThreadHelper.getThreadStateString("kernelThread"));
+      Output.debugPrint(
+          "View from ProcessCreator -- Timer thread is "
+              + ThreadHelper.getThreadStateString("timerThread"));
       ThreadHelper.threadSleep(1000);
     }
   }
