@@ -13,8 +13,6 @@ public class ProcessCreator extends UserlandProcess {
           "View from ProcessCreator -- Bootloader thread is "
               + ThreadHelper.getThreadStateString("bootloaderThread"));
       Output.debugPrint(
-          "View from ProcessCreator -- Bootloader isDone? " + OS.getContextSwitcher().isDone());
-      Output.debugPrint(
           "View from ProcessCreator -- Main thread is "
               + ThreadHelper.getThreadStateString("mainThread"));
       Output.debugPrint(

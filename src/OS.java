@@ -42,7 +42,7 @@ public class OS {
 
   public static int startupCreateProcess(
       UnprivilegedContextSwitcher cs, UserlandProcess processCreator, PriorityType pt) {
-    switchContextAntechamber(cs, CallType.STARTUP_CREATE_PROCESS, processCreator, pt);
+    switchContext(cs, CallType.STARTUP_CREATE_PROCESS, processCreator, pt);
     return (int)
         getRetVal()
             .orElseThrow(
@@ -55,7 +55,8 @@ public class OS {
    * The point of this method is to have one central location where all the data sharing needed for
    * a particular context switch occurs.
    *
-   * <p>It is synchronized so no other context switch can occur at the same time.
+   * <p>It is synchronized on the context switcher, so no other context switch can occur at the same
+   * time.
    *
    * @param cs
    * @param callType
@@ -63,12 +64,13 @@ public class OS {
    */
   public static void switchContext(
       UnprivilegedContextSwitcher cs, CallType callType, Object... params) {
+    Output.debugPrint(Thread.currentThread().getName() + " about to enter switchContext");
     synchronized (cs) {
       // Announce our arrival.
       Output.debugPrint(Thread.currentThread().getName() + " just entered switchContext");
 
       // Store a reference on OS to the Runnable whose thread is calling this method.
-      setContextSwitcher(cs);
+      preSetContextSwitcher(cs);
 
       // Set the call type for this context switch.
       setCallType(callType);
@@ -77,7 +79,7 @@ public class OS {
       setParams(params);
 
       // Start Kernel; stop contextSwitcher.
-      startKernel();
+      startKernel(cs);
 
       // Save the value returned from the Kernel to the context switcher.
       getRetVal().ifPresent(cs::setContextSwitchRet);
@@ -124,9 +126,9 @@ public class OS {
   }
 
   /** Only called by contextSwitcher thread. */
-  private static void startKernel() {
+  private static void startKernel(UnprivilegedContextSwitcher cs) {
     getKernel().start();
-    getContextSwitcher().stop();
+    cs.stop();
   }
 
   public static void startKernelOnly() {
@@ -135,14 +137,7 @@ public class OS {
 
   /** Only called by Kernel thread. */
   public static void startContextSwitcher() {
-    getContextSwitcher().start();
-  }
-
-  /** Where you take off your coat and wait to be let into the switchContext method. */
-  public static void switchContextAntechamber(
-      UnprivilegedContextSwitcher ucs, CallType callType, Object... params) {
-    Output.debugPrint(Thread.currentThread().getName() + " is about to enter switchContext");
-    switchContext(ucs, callType, params);
+    preGetContextSwitcher().start();
   }
 
   /**
@@ -154,15 +149,43 @@ public class OS {
     retVal = rv;
   }
 
+  /**
+   * Unsynchronized caller of getContextSwitcher to facilitate debugging.
+   *
+   * @return
+   */
+  public static UnprivilegedContextSwitcher preGetContextSwitcher() {
+    Output.debugPrint(Thread.currentThread().getName() + " about to enter OS.getContextSwitcher");
+    return getContextSwitcher();
+  }
+
+  /**
+   * We do not rely on the Kernel's semaphore to guard contextSwitcher because other threads besides
+   * the Kernel's may want to read its contents. So we make its getters/setters synchronized.
+   *
+   * @return
+   */
   public static synchronized UnprivilegedContextSwitcher getContextSwitcher() {
+    Output.debugPrint(Thread.currentThread().getName() + " just entered OS.getContextSwitcher");
     Objects.requireNonNull(
         contextSwitcher, Output.getErrorString("Tried to get OS.contextSwitcher but it was null"));
     return contextSwitcher;
   }
 
   public static synchronized void setContextSwitcher(UnprivilegedContextSwitcher cs) {
+    Output.debugPrint(Thread.currentThread().getName() + " just entered OS.setContextSwitcher");
     Objects.requireNonNull(cs, Output.getErrorString("Cannot set OS.contextSwitcher to null"));
     contextSwitcher = cs;
+  }
+
+  /**
+   * Unsynchronized caller of setContextSwitcher to facilitate debugging.
+   *
+   * @param cs
+   */
+  public static void preSetContextSwitcher(UnprivilegedContextSwitcher cs) {
+    Output.debugPrint(Thread.currentThread().getName() + " about to enter OS.setContextSwitcher");
+    setContextSwitcher(cs);
   }
 
   public static CallType getCallType() {
@@ -171,6 +194,16 @@ public class OS {
     return callType;
   }
 
+  /**
+   * This is called prior to calling "release" on the Kernel's semaphore, so it "happens-before" the
+   * Kernel thread's call to getCallType which follows its successful "acquire" of its UCS-released
+   * semaphore.
+   *
+   * <p>In other words, callType is "guarded by" the Kernel's semaphore, ensuring the Kernel can
+   * "see" changes made to it by the UCS thread.
+   *
+   * @param ct
+   */
   public static void setCallType(CallType ct) {
     Objects.requireNonNull(ct, Output.getErrorString("Cannot set OS.callType to null."));
     callType = ct;
