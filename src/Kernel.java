@@ -29,7 +29,7 @@ public class Kernel implements Stoppable, Runnable {
     pcb.init();
     pcb.start();
     OS.setRetValOnOS(pcb.getPid());
-    getScheduler().setCurrentlyRunning(pcb);
+    getScheduler().preSetCurrentlyRunning(pcb);
     getScheduler().startTimer();
   }
 

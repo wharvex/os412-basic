@@ -44,11 +44,27 @@ public class Scheduler {
   }
 
   public synchronized Optional<PCB> getCurrentlyRunning() {
+    Output.debugPrint(
+        Thread.currentThread().getName() + " just entered Scheduler.getCurrentlyRunning");
     return Optional.ofNullable(currentlyRunning);
   }
 
   public synchronized void setCurrentlyRunning(PCB currentlyRunning) {
+    Output.debugPrint(
+        Thread.currentThread().getName() + " just entered Scheduler.setCurrentlyRunning");
     this.currentlyRunning = currentlyRunning;
+  }
+
+  public Optional<PCB> preGetCurrentlyRunning() {
+    Output.debugPrint(
+        Thread.currentThread().getName() + " about to enter Scheduler.getCurrentlyRunning");
+    return getCurrentlyRunning();
+  }
+
+  public void preSetCurrentlyRunning(PCB currentlyRunning) {
+    Output.debugPrint(
+        Thread.currentThread().getName() + " about to enter Scheduler.setCurrentlyRunning");
+    setCurrentlyRunning(currentlyRunning);
   }
 
   public void startTimer() {
@@ -57,7 +73,7 @@ public class Scheduler {
           @Override
           public void run() {
             Output.debugPrint(Thread.currentThread().getName() + " is running");
-            getCurrentlyRunning()
+            preGetCurrentlyRunning()
                 .ifPresentOrElse(
                     cr ->
                         Output.debugPrint(

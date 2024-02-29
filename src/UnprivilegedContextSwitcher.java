@@ -24,6 +24,11 @@ public interface UnprivilegedContextSwitcher extends Stoppable {
     }
   }
 
+  @Override
+  default boolean isStopped() {
+    return Stoppable.super.isStopped();
+  }
+
   void csRetsAdd(Object ret);
 
   default boolean isDone() {

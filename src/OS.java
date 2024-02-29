@@ -31,7 +31,7 @@ public class OS {
    * Use Objects.requireNonNull for this method and other getters and setters on OS because OS has
    * no constructor and therefore more null danger.
    *
-   * @return the kernel, duh
+   * @return
    */
   private static Kernel getKernel() {
     Objects.requireNonNull(kernel, "Tried to get OS.kernel but it was null.");
@@ -116,8 +116,16 @@ public class OS {
   }
 
   /**
-   * If retVal is null, it means the kernelland method's return type was void, and we do not save it
-   * to the contextSwitcher.
+   * Data field X is guarded by the semaphore whose parking space is reserved for the thread that
+   * wants to reliably "see" an update made to X.
+   *
+   * <p>As such, retVal is guarded by the UnprivilegedContextSwitcher's semaphore.
+   *
+   * <p>The UCS's thread is the only thread that needs to "see" updates to retVal. As such, we rely
+   * solely on UCS's semaphore for visibility assurance, and leave this method unsynchronized.
+   *
+   * <p>If retVal is null, it means the kernelland method's return type was void, and we do not save
+   * it to the contextSwitcher.
    *
    * @return
    */
@@ -127,11 +135,11 @@ public class OS {
 
   /** Only called by contextSwitcher thread. */
   private static void startKernel(UnprivilegedContextSwitcher cs) {
-    getKernel().start();
+    onlyStartKernel();
     cs.stop();
   }
 
-  public static void startKernelOnly() {
+  public static void onlyStartKernel() {
     getKernel().start();
   }
 
@@ -196,8 +204,8 @@ public class OS {
 
   /**
    * This is called prior to calling "release" on the Kernel's semaphore, so it "happens-before" the
-   * Kernel thread's call to getCallType which follows its successful "acquire" of its UCS-released
-   * semaphore.
+   * Kernel's call to getCallType, which follows the Kernel's successful "acquire" of its
+   * UCS-released semaphore.
    *
    * <p>In other words, callType is "guarded by" the Kernel's semaphore, ensuring the Kernel can
    * "see" changes made to it by the UCS thread.

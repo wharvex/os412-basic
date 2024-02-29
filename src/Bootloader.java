@@ -35,6 +35,11 @@ public class Bootloader implements UnprivilegedContextSwitcher, Runnable {
   }
 
   @Override
+  public boolean isStopped() {
+    return UnprivilegedContextSwitcher.super.isStopped();
+  }
+
+  @Override
   public void run() {
     Output.debugPrint(getThreadName() + " initting");
     setContextSwitchRet(OS.startup(this));

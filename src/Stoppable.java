@@ -35,13 +35,21 @@ public interface Stoppable {
 
   Thread getThread();
 
+  default boolean preIsStopped() {
+    Output.debugPrint(Thread.currentThread().getName() + " about to enter isStopped");
+    return isStopped();
+  }
+
   default boolean isStopped() {
+    //    Output.debugPrint(Thread.currentThread().getName() + " just entered isStopped");
     return getSemaphore().hasQueuedThreads();
   }
 
   default void start() {
     // Wait until what we want to start is stopped.
     while (!isStopped()) {
+      Output.debugPrint(
+          Thread.currentThread().getName() + " waiting for " + getThreadName() + " to stop");
       ThreadHelper.threadSleep(10);
     }
 
