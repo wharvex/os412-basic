@@ -61,25 +61,27 @@ public class OS {
    * @param callType
    * @param params
    */
-  public static synchronized void switchContext(
+  public static void switchContext(
       UnprivilegedContextSwitcher cs, CallType callType, Object... params) {
-    // Announce our arrival.
-    Output.debugPrint(Thread.currentThread().getName() + " just entered switchContext");
+    synchronized (cs) {
+      // Announce our arrival.
+      Output.debugPrint(Thread.currentThread().getName() + " just entered switchContext");
 
-    // Store a reference on OS to the Runnable whose thread is calling this method.
-    setContextSwitcher(cs);
+      // Store a reference on OS to the Runnable whose thread is calling this method.
+      setContextSwitcher(cs);
 
-    // Set the call type for this context switch.
-    setCallType(callType);
+      // Set the call type for this context switch.
+      setCallType(callType);
 
-    // Clear current params; set new ones.
-    setParams(params);
+      // Clear current params; set new ones.
+      setParams(params);
 
-    // Start Kernel; stop contextSwitcher.
-    startKernel();
+      // Start Kernel; stop contextSwitcher.
+      startKernel();
 
-    // Save the value returned from the Kernel to the context switcher.
-    getRetVal().ifPresent(cs::setContextSwitchRet);
+      // Save the value returned from the Kernel to the context switcher.
+      getRetVal().ifPresent(cs::setContextSwitchRet);
+    }
   }
 
   private static void setParams(Object... newParams) {
@@ -152,13 +154,13 @@ public class OS {
     retVal = rv;
   }
 
-  public static UnprivilegedContextSwitcher getContextSwitcher() {
+  public static synchronized UnprivilegedContextSwitcher getContextSwitcher() {
     Objects.requireNonNull(
         contextSwitcher, Output.getErrorString("Tried to get OS.contextSwitcher but it was null"));
     return contextSwitcher;
   }
 
-  public static void setContextSwitcher(UnprivilegedContextSwitcher cs) {
+  public static synchronized void setContextSwitcher(UnprivilegedContextSwitcher cs) {
     Objects.requireNonNull(cs, Output.getErrorString("Cannot set OS.contextSwitcher to null"));
     contextSwitcher = cs;
   }

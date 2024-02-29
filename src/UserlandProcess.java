@@ -18,12 +18,18 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     stopRequested = false;
   }
 
+  /** Only called by Timer thread via PCB. */
   public void requestStop() {
-    stopRequested = true;
+    setStopRequested(true);
+    // Wait here for process to stop.
   }
 
-  public boolean isStopRequested() {
+  public synchronized boolean isStopRequested() {
     return stopRequested;
+  }
+
+  private synchronized void setStopRequested(boolean isRequested) {
+    stopRequested = isRequested;
   }
 
   public void cooperate() {}
@@ -40,7 +46,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
 
   @Override
   public void run() {
-    Output.debugPrint(getThreadName() + " initting now");
+    Output.debugPrint(getThreadName() + " initting");
     stop();
     main();
   }

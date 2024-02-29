@@ -36,7 +36,7 @@ public class Bootloader implements UnprivilegedContextSwitcher, Runnable {
 
   @Override
   public void run() {
-    Output.debugPrint(getThreadName() + " initting now");
+    Output.debugPrint(getThreadName() + " initting");
     setContextSwitchRet(OS.startup(this));
   }
 }

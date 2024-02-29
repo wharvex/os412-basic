@@ -4,7 +4,7 @@ import java.util.concurrent.Semaphore;
 public interface Stoppable {
 
   default void init() {
-    Output.debugPrint(Thread.currentThread().getName() + " initting " + getThreadName() + " now");
+    Output.debugPrint(Thread.currentThread().getName() + " initting " + getThreadName());
     getThread().start();
   }
 
@@ -22,9 +22,9 @@ public interface Stoppable {
           Output.getErrorString("Parking space reserved for " + getThreadName()));
     }
     try {
-      Output.debugPrint(getThreadName() + " stopping now");
+      Output.debugPrint(getThreadName() + " stopping");
       getSemaphore().acquire();
-      Output.debugPrint(getThreadName() + " starting now");
+      Output.debugPrint(getThreadName() + " starting");
     } catch (InterruptedException e) {
       Output.errorPrint(getThreadName() + " interrupted while parked at its semaphore");
       Thread.currentThread().interrupt();
@@ -51,7 +51,7 @@ public interface Stoppable {
           Thread.currentThread().getName()
               + " releasing semaphore at which "
               + getThreadName()
-              + " is parked now");
+              + " is parked");
       getSemaphore().release();
     } else {
       Output.debugPrint(

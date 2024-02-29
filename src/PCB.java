@@ -99,6 +99,10 @@ public class PCB {
     }
   }
 
+  public void init() {
+    getUserlandProcess().init();
+  }
+
   public void start() {
     getUserlandProcess().start();
   }

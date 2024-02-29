@@ -25,16 +25,17 @@ public class Kernel implements Stoppable, Runnable {
   private void startupCreateProcess() {
     UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
     OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
-    processCreator.init();
-    processCreator.start();
-    OS.setRetValOnOS(1);
-    getScheduler().setCurrentlyRunning(new PCB(processCreator, pt));
+    PCB pcb = new PCB(processCreator, pt);
+    pcb.init();
+    pcb.start();
+    OS.setRetValOnOS(pcb.getPid());
+    getScheduler().setCurrentlyRunning(pcb);
     getScheduler().startTimer();
   }
 
   @Override
   public void run() {
-    Output.debugPrint(getThreadName() + " initting now");
+    Output.debugPrint(getThreadName() + " initting");
     while (true) {
       stop();
       switch (OS.getCallType()) {
