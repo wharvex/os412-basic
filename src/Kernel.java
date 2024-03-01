@@ -28,7 +28,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   }
 
   private void startupCreateProcess() {
-    UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
+    UserlandProcess processCreator = (UserlandProcess) OS.getParam(7);
     OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
     PCB pcb = new PCB(processCreator, pt);
     pcb.init();

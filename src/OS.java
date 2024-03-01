@@ -43,12 +43,18 @@ public class OS {
   public static int startupCreateProcess(
       UnprivilegedContextSwitcher cs, UserlandProcess processCreator, PriorityType pt) {
     switchContext(cs, CallType.STARTUP_CREATE_PROCESS, processCreator, pt);
-    return (int)
-        getRetVal()
-            .orElseThrow(
-                () ->
-                    new RuntimeException(
-                        Output.getErrorString("Expected int retVal from createProcess")));
+    try {
+      return (int)
+          getRetVal()
+              .orElseThrow(
+                  () ->
+                      new RuntimeException(
+                          Output.getErrorString("Expected int retVal from createProcess")));
+
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
   }
 
   /**
@@ -91,8 +97,14 @@ public class OS {
     params.clear();
 
     // Check if any of the newParams are null.
-    if (Arrays.stream(newParams).anyMatch(Objects::isNull)) {
-      throw new RuntimeException(Output.getErrorString("Cannot add any null elements to params."));
+    try {
+      if (Arrays.stream(newParams).anyMatch(Objects::isNull)) {
+        throw new RuntimeException(
+            Output.getErrorString("Cannot add any null elements to params."));
+      }
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
     }
 
     // Add new params to params.
@@ -115,8 +127,13 @@ public class OS {
       throw e;
     }
     Object param = params.get(idx);
-    Objects.requireNonNull(
-        param, Output.getErrorString("Tried to get param at index " + idx + " but it was null."));
+    try {
+      Objects.requireNonNull(
+          param, Output.getErrorString("Tried to get param at index " + idx + " but it was null."));
+    } catch (NullPointerException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
     return param;
   }
 
@@ -180,14 +197,25 @@ public class OS {
    */
   public static synchronized UnprivilegedContextSwitcher getContextSwitcher() {
     Output.debugPrint(Thread.currentThread().getName() + " just entered OS.getContextSwitcher");
-    Objects.requireNonNull(
-        contextSwitcher, Output.getErrorString("Tried to get OS.contextSwitcher but it was null"));
+    try {
+      Objects.requireNonNull(
+          contextSwitcher,
+          Output.getErrorString("Tried to get OS.contextSwitcher but it was null"));
+    } catch (NullPointerException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
     return contextSwitcher;
   }
 
   public static synchronized void setContextSwitcher(UnprivilegedContextSwitcher cs) {
     Output.debugPrint(Thread.currentThread().getName() + " just entered OS.setContextSwitcher");
-    Objects.requireNonNull(cs, Output.getErrorString("Cannot set OS.contextSwitcher to null"));
+    try {
+      Objects.requireNonNull(cs, Output.getErrorString("Cannot set OS.contextSwitcher to null"));
+    } catch (NullPointerException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
     contextSwitcher = cs;
   }
 
@@ -202,8 +230,13 @@ public class OS {
   }
 
   public static CallType getCallType() {
-    Objects.requireNonNull(
-        callType, Output.getErrorString("Tried to get OS.callType but it was null"));
+    try {
+      Objects.requireNonNull(
+          callType, Output.getErrorString("Tried to get OS.callType but it was null"));
+    } catch (NullPointerException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
     return callType;
   }
 
@@ -218,7 +251,12 @@ public class OS {
    * @param ct
    */
   public static void setCallType(CallType ct) {
-    Objects.requireNonNull(ct, Output.getErrorString("Cannot set OS.callType to null."));
+    try {
+      Objects.requireNonNull(ct, Output.getErrorString("Cannot set OS.callType to null."));
+    } catch (NullPointerException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
     callType = ct;
   }
 

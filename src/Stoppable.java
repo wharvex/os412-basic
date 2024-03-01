@@ -17,9 +17,14 @@ public interface Stoppable {
   }
 
   default void stop() {
-    if (Thread.currentThread() != getThread()) {
-      throw new RuntimeException(
-          Output.getErrorString("Parking space reserved for " + getThreadName()));
+    try {
+      if (Thread.currentThread() != getThread()) {
+        throw new RuntimeException(
+            Output.getErrorString("Parking space reserved for " + getThreadName()));
+      }
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
     }
     try {
       Output.debugPrint(getThreadName() + " stopping");

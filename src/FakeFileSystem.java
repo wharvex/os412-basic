@@ -5,10 +5,15 @@ public class FakeFileSystem implements Device {
   private final String filename;
 
   public FakeFileSystem(String filename) {
-    if (filename.isEmpty() || filename.isBlank() || filename == null) {
-      throw new RuntimeException(
-          Output.getErrorString(
-              "FakeFileSystem constructor expected non-null, non-blank, non-empty filename string."));
+    try {
+      if (filename.isEmpty() || filename.isBlank() || filename == null) {
+        throw new RuntimeException(
+            Output.getErrorString(
+                "FakeFileSystem constructor expected non-null, non-blank, non-empty filename string."));
+      }
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
     }
     this.filename = filename;
     randAccArr = new RandomAccessFile[10];
