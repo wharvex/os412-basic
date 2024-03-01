@@ -106,8 +106,13 @@ public class OS {
    * @return
    */
   public static Object getParam(int idx) {
-    if (idx < 0 || idx >= params.size()) {
-      throw new RuntimeException(Output.getErrorString("Param index " + idx + " out of range."));
+    try {
+      if (idx < 0 || idx >= params.size()) {
+        throw new RuntimeException(Output.getErrorString("Param index " + idx + " out of range."));
+      }
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
     }
     Object param = params.get(idx);
     Objects.requireNonNull(
@@ -135,11 +140,11 @@ public class OS {
 
   /** Only called by contextSwitcher thread. */
   private static void startKernel(UnprivilegedContextSwitcher cs) {
-    onlyStartKernel();
+    startKernelOnly();
     cs.stop();
   }
 
-  public static void onlyStartKernel() {
+  public static void startKernelOnly() {
     getKernel().start();
   }
 
@@ -205,7 +210,7 @@ public class OS {
   /**
    * This is called prior to calling "release" on the Kernel's semaphore, so it "happens-before" the
    * Kernel's call to getCallType, which follows the Kernel's successful "acquire" of its
-   * UCS-released semaphore.
+   * UCS-released semaphore (see the Oracle docs on Semaphore).
    *
    * <p>In other words, callType is "guarded by" the Kernel's semaphore, ensuring the Kernel can
    * "see" changes made to it by the UCS thread.
