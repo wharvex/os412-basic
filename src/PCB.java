@@ -76,7 +76,12 @@ public class PCB {
   /** Only the Timer thread should use this method. */
   public void stop() {
     getUserlandProcess().requestStop();
+    getUserlandProcess().waitUntilStopped();
     incrementTimeoutsCounter();
+  }
+
+  public boolean isStopRequested() {
+    return getUserlandProcess().preIsStopRequested();
   }
 
   /** Only called by timer thread. */

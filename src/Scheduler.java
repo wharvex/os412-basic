@@ -75,12 +75,26 @@ public class Scheduler {
             Output.debugPrint(Thread.currentThread().getName() + " is running");
             preGetCurrentlyRunning()
                 .ifPresentOrElse(
-                    cr ->
-                        Output.debugPrint(
-                            Thread.currentThread().getName() + " found currentlyRunning"),
-                    () ->
-                        Output.debugPrint(
-                            Thread.currentThread().getName() + " did not find currentlyRunning"));
+                    cr -> {
+                      Output.debugPrint("View from Timer -- currentlyRunning is " + cr);
+                      Output.debugPrint(
+                          "View from Timer -- curRun stopRequested is " + cr.isStopRequested());
+                      cr.stop();
+                      setCurrentlyRunning(null);
+                    },
+                    () -> {
+                      Output.debugPrint(
+                          Thread.currentThread().getName() + " did not find currentlyRunning");
+                      Output.debugPrint(
+                          "View from Timer -- Bootloader thread is "
+                              + ThreadHelper.getThreadStateString("bootloaderThread"));
+                      Output.debugPrint(
+                          "View from Timer -- Main thread is "
+                              + ThreadHelper.getThreadStateString("mainThread"));
+                      Output.debugPrint(
+                          "View from Timer -- Kernel thread is "
+                              + ThreadHelper.getThreadStateString("kernelThread"));
+                    });
           }
         },
         1000,

@@ -20,19 +20,38 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
 
   /** Only called by Timer thread via PCB. */
   public void requestStop() {
-    setStopRequested(true);
+    preSetStopRequested(true);
     // Wait here for process to stop.
   }
 
   public synchronized boolean isStopRequested() {
+    Output.debugPrint(Thread.currentThread().getName() + " just entered isStopRequested");
     return stopRequested;
   }
 
-  private synchronized void setStopRequested(boolean isRequested) {
+  public synchronized void setStopRequested(boolean isRequested) {
+    Output.debugPrint(Thread.currentThread().getName() + " just entered setStopRequested");
     stopRequested = isRequested;
   }
 
-  public void cooperate() {}
+  public void preSetStopRequested(boolean isRequested) {
+    Output.debugPrint(Thread.currentThread().getName() + " about to enter setStopRequested");
+    setStopRequested(isRequested);
+  }
+
+  public boolean preIsStopRequested() {
+    Output.debugPrint(Thread.currentThread().getName() + " about to enter isStopRequested");
+    return isStopRequested();
+  }
+
+  public void cooperate() {
+    // Eventually: Check isStopRequested. If it's true, set it to false and call OS.switchProcess.
+    // For now: Check isStopRequested. If it's true, set it to false and stop.
+    if (isStopRequested()) {
+      setStopRequested(false);
+      stop();
+    }
+  }
 
   @Override
   public Semaphore getSemaphore() {

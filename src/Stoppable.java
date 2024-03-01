@@ -45,13 +45,17 @@ public interface Stoppable {
     return getSemaphore().hasQueuedThreads();
   }
 
-  default void start() {
-    // Wait until what we want to start is stopped.
+  default void waitUntilStopped() {
     while (!isStopped()) {
       Output.debugPrint(
           Thread.currentThread().getName() + " waiting for " + getThreadName() + " to stop");
       ThreadHelper.threadSleep(10);
     }
+  }
+
+  default void start() {
+    // Wait until what we want to start is stopped.
+    waitUntilStopped();
 
     // Ensure semaphore remains binary.
     if (getSemaphore().availablePermits() < 1) {

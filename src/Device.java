@@ -1,12 +1,12 @@
 /** KERNELLAND */
 public interface Device {
-  int Open(String s);
+  int open(String s);
 
-  void Close(int id);
+  void close(int id);
 
-  byte[] Read(int id, int size);
+  byte[] read(int id, int size);
 
-  void Seek(int id, int to);
+  void seek(int id, int to);
 
-  int Write(int id, byte[] data);
+  int write(int id, byte[] data);
 }
