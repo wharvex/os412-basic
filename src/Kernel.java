@@ -28,7 +28,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   }
 
   private void startupCreateProcess() {
-    UserlandProcess processCreator = (UserlandProcess) OS.getParam(7);
+    UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
     OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
     PCB pcb = new PCB(processCreator, pt);
     pcb.init();
@@ -38,6 +38,18 @@ public class Kernel implements Stoppable, Runnable, Device {
     getScheduler().startTimer();
   }
 
+  private void createProcess() {
+    UserlandProcess up = (UserlandProcess) OS.getParam(0);
+    OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
+    PCB pcb = new PCB(up, pt);
+    pcb.init();
+    Output.debugPrint(
+        OS.getContextSwitcher().getThreadName()
+            + "'s request to create "
+            + pcb.getUserlandProcess().getThreadName()
+            + " fulfilled by Kernel");
+  }
+
   @Override
   public void run() {
     Output.debugPrint(getThreadName() + " initting");
@@ -45,6 +57,7 @@ public class Kernel implements Stoppable, Runnable, Device {
       stop();
       switch (OS.getCallType()) {
         case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
+        case OS.CallType.CREATE_PROCESS -> createProcess();
       }
       OS.startContextSwitcher();
     }

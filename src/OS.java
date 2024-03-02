@@ -49,8 +49,23 @@ public class OS {
               .orElseThrow(
                   () ->
                       new RuntimeException(
-                          Output.getErrorString("Expected int retVal from createProcess")));
+                          Output.getErrorString("Expected int retVal from startupCreateProcess")));
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
+  }
 
+  public static int createProcess(
+      UnprivilegedContextSwitcher cs, UserlandProcess up, PriorityType pt) {
+    switchContext(cs, CallType.CREATE_PROCESS, up, pt);
+    try {
+      return (int)
+          getRetVal()
+              .orElseThrow(
+                  () ->
+                      new RuntimeException(
+                          Output.getErrorString("Expected int retVal from createProcess")));
     } catch (RuntimeException e) {
       Output.writeToFile(e.toString());
       throw e;
@@ -70,10 +85,12 @@ public class OS {
    */
   public static void switchContext(
       UnprivilegedContextSwitcher cs, CallType callType, Object... params) {
-    Output.debugPrint(Thread.currentThread().getName() + " about to enter switchContext");
+    Output.debugPrint(
+        Thread.currentThread().getName() + " about to enter switchContext for " + callType);
     synchronized (cs) {
       // Announce our arrival.
-      Output.debugPrint(Thread.currentThread().getName() + " just entered switchContext");
+      Output.debugPrint(
+          Thread.currentThread().getName() + " just entered switchContext for " + callType);
 
       // Store a reference on OS to the Runnable whose thread is calling this method.
       preSetContextSwitcher(cs);
@@ -196,7 +213,11 @@ public class OS {
    * @return
    */
   public static synchronized UnprivilegedContextSwitcher getContextSwitcher() {
-    Output.debugPrint(Thread.currentThread().getName() + " just entered OS.getContextSwitcher");
+    Output.debugPrint(
+        "View from "
+            + Thread.currentThread().getName()
+            + " -- OS.contextSwitcher is "
+            + contextSwitcher.getThreadName());
     try {
       Objects.requireNonNull(
           contextSwitcher,
@@ -209,13 +230,14 @@ public class OS {
   }
 
   public static synchronized void setContextSwitcher(UnprivilegedContextSwitcher cs) {
-    Output.debugPrint(Thread.currentThread().getName() + " just entered OS.setContextSwitcher");
     try {
       Objects.requireNonNull(cs, Output.getErrorString("Cannot set OS.contextSwitcher to null"));
     } catch (NullPointerException e) {
       Output.writeToFile(e.toString());
       throw e;
     }
+    Output.debugPrint(
+        Thread.currentThread().getName() + " setting OS.contextSwitcher to " + cs.getThreadName());
     contextSwitcher = cs;
   }
 

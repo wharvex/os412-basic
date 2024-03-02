@@ -64,18 +64,14 @@ public interface Stoppable {
 
     // Ensure semaphore remains binary.
     if (getSemaphore().availablePermits() < 1) {
-      Output.debugPrint(
-          Thread.currentThread().getName()
-              + " releasing semaphore at which "
-              + getThreadName()
-              + " is parked");
+      Output.debugPrint(Thread.currentThread().getName() + " starting " + getThreadName());
       getSemaphore().release();
     } else {
       Output.debugPrint(
-          "Semaphore for "
+          Thread.currentThread().getName()
+              + " did not release "
               + getThreadName()
-              + " not released by "
-              + Thread.currentThread().getName());
+              + "'s semaphore because its available permits are not less than 1");
     }
   }
 }

@@ -26,11 +26,15 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
 
   public synchronized boolean isStopRequested() {
     Output.debugPrint(Thread.currentThread().getName() + " just entered isStopRequested");
+    Output.debugPrint(
+        "View from " + Thread.currentThread().getName() + " -- stopRequested is " + stopRequested);
     return stopRequested;
   }
 
   public synchronized void setStopRequested(boolean isRequested) {
     Output.debugPrint(Thread.currentThread().getName() + " just entered setStopRequested");
+    Output.debugPrint(
+        Thread.currentThread().getName() + " setting stopRequested to " + isRequested);
     stopRequested = isRequested;
   }
 
@@ -47,8 +51,8 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   public void cooperate() {
     // Eventually: Check isStopRequested. If it's true, set it to false and call OS.switchProcess.
     // For now: Check isStopRequested. If it's true, set it to false and stop.
-    if (isStopRequested()) {
-      setStopRequested(false);
+    if (preIsStopRequested()) {
+      preSetStopRequested(false);
       stop();
     }
   }

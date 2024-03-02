@@ -45,13 +45,18 @@ public class Scheduler {
 
   public synchronized Optional<PCB> getCurrentlyRunning() {
     Output.debugPrint(
-        Thread.currentThread().getName() + " just entered Scheduler.getCurrentlyRunning");
+        "View from "
+            + Thread.currentThread().getName()
+            + " -- Scheduler.currentlyRunning is "
+            + (currentlyRunning != null ? currentlyRunning.getThreadName() : "null"));
     return Optional.ofNullable(currentlyRunning);
   }
 
   public synchronized void setCurrentlyRunning(PCB currentlyRunning) {
     Output.debugPrint(
-        Thread.currentThread().getName() + " just entered Scheduler.setCurrentlyRunning");
+        Thread.currentThread().getName()
+            + " setting Scheduler.currentlyRunning to "
+            + (currentlyRunning != null ? currentlyRunning.getThreadName() : "null"));
     this.currentlyRunning = currentlyRunning;
   }
 
@@ -72,7 +77,7 @@ public class Scheduler {
         new TimerTask() {
           @Override
           public void run() {
-            Output.debugPrint(Thread.currentThread().getName() + " is running");
+            Output.debugPrint(Thread.currentThread().getName() + " starting");
             preGetCurrentlyRunning()
                 .ifPresentOrElse(
                     cr -> {
@@ -80,7 +85,7 @@ public class Scheduler {
                       Output.debugPrint(
                           "View from Timer -- curRun stopRequested is " + cr.isStopRequested());
                       cr.stop();
-                      setCurrentlyRunning(null);
+                      preSetCurrentlyRunning(null);
                     },
                     () -> {
                       Output.debugPrint(

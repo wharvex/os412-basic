@@ -21,7 +21,7 @@ public class ProcessCreator extends UserlandProcess {
       Output.debugPrint(
           "View from ProcessCreator -- Timer thread is "
               + ThreadHelper.getThreadStateString("timerThread"));
-      Output.debugPrint("View from ProcessCreator -- stopRequested is " + preIsStopRequested());
+      OS.createProcess(this, new SleepyProcess(), OS.PriorityType.INTERACTIVE);
       cooperate();
       ThreadHelper.threadSleep(1000);
     }
