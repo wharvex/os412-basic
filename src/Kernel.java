@@ -47,12 +47,12 @@ public class Kernel implements Stoppable, Runnable, Device {
         OS.getContextSwitcher().getThreadName()
             + "'s request to create "
             + pcb.getUserlandProcess().getThreadName()
-            + " fulfilled by Kernel");
+            + " fulfilled");
   }
 
   @Override
   public void run() {
-    Output.debugPrint(getThreadName() + " initting");
+    Output.debugPrint("Initting");
     while (true) {
       stop();
       switch (OS.getCallType()) {

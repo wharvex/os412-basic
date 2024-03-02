@@ -8,7 +8,7 @@ import java.nio.file.Path;
 /** MAINLAND */
 public class Output {
   public static void debugPrint(String baseStr) {
-    String printStr = "\nDEBUG OUTPUT: " + baseStr;
+    String printStr = "\nDEBUG OUTPUT from " + Thread.currentThread().getName() + ": " + baseStr;
     System.out.println(printStr);
     writeToFile(printStr);
   }

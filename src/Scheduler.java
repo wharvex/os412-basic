@@ -45,30 +45,25 @@ public class Scheduler {
 
   public synchronized Optional<PCB> getCurrentlyRunning() {
     Output.debugPrint(
-        "View from "
-            + Thread.currentThread().getName()
-            + " -- Scheduler.currentlyRunning is "
+        "Scheduler.currentlyRunning is "
             + (currentlyRunning != null ? currentlyRunning.getThreadName() : "null"));
     return Optional.ofNullable(currentlyRunning);
   }
 
   public synchronized void setCurrentlyRunning(PCB currentlyRunning) {
     Output.debugPrint(
-        Thread.currentThread().getName()
-            + " setting Scheduler.currentlyRunning to "
+        "Setting Scheduler.currentlyRunning to "
             + (currentlyRunning != null ? currentlyRunning.getThreadName() : "null"));
     this.currentlyRunning = currentlyRunning;
   }
 
   public Optional<PCB> preGetCurrentlyRunning() {
-    Output.debugPrint(
-        Thread.currentThread().getName() + " about to enter Scheduler.getCurrentlyRunning");
+    Output.debugPrint("About to enter Scheduler.getCurrentlyRunning");
     return getCurrentlyRunning();
   }
 
   public void preSetCurrentlyRunning(PCB currentlyRunning) {
-    Output.debugPrint(
-        Thread.currentThread().getName() + " about to enter Scheduler.setCurrentlyRunning");
+    Output.debugPrint("About to enter Scheduler.setCurrentlyRunning");
     setCurrentlyRunning(currentlyRunning);
   }
 
@@ -77,28 +72,25 @@ public class Scheduler {
         new TimerTask() {
           @Override
           public void run() {
-            Output.debugPrint(Thread.currentThread().getName() + " starting");
+            Output.debugPrint("Starting");
             preGetCurrentlyRunning()
                 .ifPresentOrElse(
                     cr -> {
-                      Output.debugPrint("View from Timer -- currentlyRunning is " + cr);
+                      Output.debugPrint("Scheduler.currentlyRunning is " + cr);
                       Output.debugPrint(
-                          "View from Timer -- curRun stopRequested is " + cr.isStopRequested());
+                          "currentlyRunning.stopRequested is " + cr.isStopRequested());
                       cr.stop();
                       preSetCurrentlyRunning(null);
                     },
                     () -> {
+                      Output.debugPrint("Scheduler.currentlyRunning is null");
                       Output.debugPrint(
-                          Thread.currentThread().getName() + " did not find currentlyRunning");
-                      Output.debugPrint(
-                          "View from Timer -- Bootloader thread is "
+                          "bootloaderThread is "
                               + ThreadHelper.getThreadStateString("bootloaderThread"));
                       Output.debugPrint(
-                          "View from Timer -- Main thread is "
-                              + ThreadHelper.getThreadStateString("mainThread"));
+                          "mainThread is " + ThreadHelper.getThreadStateString("mainThread"));
                       Output.debugPrint(
-                          "View from Timer -- Kernel thread is "
-                              + ThreadHelper.getThreadStateString("kernelThread"));
+                          "kernelThread is " + ThreadHelper.getThreadStateString("kernelThread"));
                     });
           }
         },

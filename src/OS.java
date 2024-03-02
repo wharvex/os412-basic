@@ -85,12 +85,10 @@ public class OS {
    */
   public static void switchContext(
       UnprivilegedContextSwitcher cs, CallType callType, Object... params) {
-    Output.debugPrint(
-        Thread.currentThread().getName() + " about to enter switchContext for " + callType);
+    Output.debugPrint("About to enter switchContext for " + callType);
     synchronized (cs) {
       // Announce our arrival.
-      Output.debugPrint(
-          Thread.currentThread().getName() + " just entered switchContext for " + callType);
+      Output.debugPrint("Just entered switchContext for " + callType);
 
       // Store a reference on OS to the Runnable whose thread is calling this method.
       preSetContextSwitcher(cs);
@@ -202,7 +200,7 @@ public class OS {
    * @return
    */
   public static UnprivilegedContextSwitcher preGetContextSwitcher() {
-    Output.debugPrint(Thread.currentThread().getName() + " about to enter OS.getContextSwitcher");
+    Output.debugPrint("About to enter OS.getContextSwitcher");
     return getContextSwitcher();
   }
 
@@ -213,11 +211,6 @@ public class OS {
    * @return
    */
   public static synchronized UnprivilegedContextSwitcher getContextSwitcher() {
-    Output.debugPrint(
-        "View from "
-            + Thread.currentThread().getName()
-            + " -- OS.contextSwitcher is "
-            + contextSwitcher.getThreadName());
     try {
       Objects.requireNonNull(
           contextSwitcher,
@@ -226,6 +219,7 @@ public class OS {
       Output.writeToFile(e.toString());
       throw e;
     }
+    Output.debugPrint("OS.contextSwitcher is " + contextSwitcher.getThreadName());
     return contextSwitcher;
   }
 
@@ -236,8 +230,7 @@ public class OS {
       Output.writeToFile(e.toString());
       throw e;
     }
-    Output.debugPrint(
-        Thread.currentThread().getName() + " setting OS.contextSwitcher to " + cs.getThreadName());
+    Output.debugPrint("Setting OS.contextSwitcher to " + cs.getThreadName());
     contextSwitcher = cs;
   }
 
@@ -247,7 +240,7 @@ public class OS {
    * @param cs
    */
   public static void preSetContextSwitcher(UnprivilegedContextSwitcher cs) {
-    Output.debugPrint(Thread.currentThread().getName() + " about to enter OS.setContextSwitcher");
+    Output.debugPrint("About to enter OS.setContextSwitcher");
     setContextSwitcher(cs);
   }
 

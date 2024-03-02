@@ -25,26 +25,22 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   }
 
   public synchronized boolean isStopRequested() {
-    Output.debugPrint(Thread.currentThread().getName() + " just entered isStopRequested");
-    Output.debugPrint(
-        "View from " + Thread.currentThread().getName() + " -- stopRequested is " + stopRequested);
+    Output.debugPrint("stopRequested is " + stopRequested);
     return stopRequested;
   }
 
   public synchronized void setStopRequested(boolean isRequested) {
-    Output.debugPrint(Thread.currentThread().getName() + " just entered setStopRequested");
-    Output.debugPrint(
-        Thread.currentThread().getName() + " setting stopRequested to " + isRequested);
+    Output.debugPrint("Setting stopRequested to " + isRequested);
     stopRequested = isRequested;
   }
 
   public void preSetStopRequested(boolean isRequested) {
-    Output.debugPrint(Thread.currentThread().getName() + " about to enter setStopRequested");
+    Output.debugPrint("About to enter setStopRequested");
     setStopRequested(isRequested);
   }
 
   public boolean preIsStopRequested() {
-    Output.debugPrint(Thread.currentThread().getName() + " about to enter isStopRequested");
+    Output.debugPrint("About to enter isStopRequested");
     return isStopRequested();
   }
 
@@ -69,7 +65,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
 
   @Override
   public void run() {
-    Output.debugPrint(getThreadName() + " initting");
+    Output.debugPrint("Initting");
     stop();
     main();
   }

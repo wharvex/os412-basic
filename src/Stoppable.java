@@ -4,7 +4,7 @@ import java.util.concurrent.Semaphore;
 public interface Stoppable {
 
   default void init() {
-    Output.debugPrint(Thread.currentThread().getName() + " initting " + getThreadName());
+    Output.debugPrint("Initting " + getThreadName());
     getThread().start();
   }
 
@@ -26,34 +26,27 @@ public interface Stoppable {
       Output.writeToFile(e.toString());
       throw e;
     }
+    Output.debugPrint("Stopping");
     try {
-      Output.debugPrint(getThreadName() + " stopping");
       getSemaphore().acquire();
-      Output.debugPrint(getThreadName() + " starting");
     } catch (InterruptedException e) {
       Output.errorPrint(getThreadName() + " interrupted while parked at its semaphore");
       Thread.currentThread().interrupt();
     }
+    Output.debugPrint("Starting");
   }
 
   Semaphore getSemaphore();
 
   Thread getThread();
 
-  default boolean preIsStopped() {
-    Output.debugPrint(Thread.currentThread().getName() + " about to enter isStopped");
-    return isStopped();
-  }
-
   default boolean isStopped() {
-    //    Output.debugPrint(Thread.currentThread().getName() + " just entered isStopped");
     return getSemaphore().hasQueuedThreads();
   }
 
   default void waitUntilStopped() {
     while (!isStopped()) {
-      Output.debugPrint(
-          Thread.currentThread().getName() + " waiting for " + getThreadName() + " to stop");
+      Output.debugPrint("Waiting for " + getThreadName() + " to stop");
       ThreadHelper.threadSleep(10);
     }
   }
@@ -64,12 +57,11 @@ public interface Stoppable {
 
     // Ensure semaphore remains binary.
     if (getSemaphore().availablePermits() < 1) {
-      Output.debugPrint(Thread.currentThread().getName() + " starting " + getThreadName());
+      Output.debugPrint("Starting " + getThreadName());
       getSemaphore().release();
     } else {
       Output.debugPrint(
-          Thread.currentThread().getName()
-              + " did not release "
+          "Did not release "
               + getThreadName()
               + "'s semaphore because its available permits are not less than 1");
     }
