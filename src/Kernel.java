@@ -29,11 +29,7 @@ public class Kernel implements Stoppable, Runnable, Device {
 
   private PCB createPCB(UserlandProcess up, OS.PriorityType pt) {
     PCB pcb = new PCB(up, pt);
-    Output.debugPrint(
-        OS.preGetContextSwitcher().getThreadName()
-            + "'s request to create "
-            + up.getThreadName()
-            + " is fulfilled");
+    Output.debugPrint("Request to create " + up.getThreadName() + " is fulfilled");
     return pcb;
   }
 
@@ -42,9 +38,8 @@ public class Kernel implements Stoppable, Runnable, Device {
     OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
     PCB pcb = createPCB(processCreator, pt);
     pcb.init();
-    pcb.start();
-    OS.setRetValOnOS(pcb.getPid());
     getScheduler().preSetCurrentlyRunning(pcb);
+    OS.setRetValOnOS(pcb.getPid());
     getScheduler().startTimer();
   }
 
@@ -57,37 +52,8 @@ public class Kernel implements Stoppable, Runnable, Device {
     getScheduler().switchProcess();
   }
 
-  @Override
-  public void run() {
-    Output.debugPrint("Initting");
-    while (true) {
-      stop();
-      switch (OS.getCallType()) {
-        case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
-        case OS.CallType.CREATE_PROCESS -> createProcess();
-      }
-      getScheduler()
-          .preGetCurrentlyRunning()
-          .ifPresentOrElse(
-              cr -> {
-                Output.debugPrint(
-                    "Checking if currentlyRunning is contextSwitcher and callType is"
-                        + " STARTUP_CREATE_PROCESS...");
-                if (!cr.getThreadName().equals(OS.preGetContextSwitcher().getThreadName())
-                    && OS.getCallType() != OS.CallType.STARTUP_CREATE_PROCESS) {
-                  cr.start();
-                } else {
-                  Output.debugPrint(
-                      "currentlyRunning is contextSwitcher or callType is STARTUP_CREATE_PROCESS,"
-                          + " so currentlyRunning was not started");
-                }
-              },
-              () -> {
-                throw new RuntimeException(
-                    "currentlyRunning should not be null at the end of the Kernel's iteration");
-              });
-      OS.startContextSwitcher();
-    }
+  public PCB getCurrentlyRunningSafe() {
+    return getScheduler().getCurrentlyRunningSafe();
   }
 
   public Scheduler getScheduler() {
@@ -135,5 +101,29 @@ public class Kernel implements Stoppable, Runnable, Device {
   @Override
   public int write(int id, byte[] data) {
     return 0;
+  }
+
+  @Override
+  public void run() {
+    Output.debugPrint("Initting");
+    while (true) {
+      stop();
+      switch (OS.getCallType()) {
+        case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
+        case OS.CallType.CREATE_PROCESS -> createProcess();
+        case OS.CallType.SWITCH_PROCESS -> getScheduler().switchProcess();
+      }
+      PCB newCurRun = getCurrentlyRunningSafe();
+      Output.debugPrint("Start the new currentlyRunning");
+      newCurRun.start();
+      UnprivilegedContextSwitcher conSwi = OS.preGetContextSwitcher();
+      Output.debugPrint("If contextSwitcher is not the new curRun, start the contextSwitcher");
+      if (conSwi != newCurRun.getUserlandProcess()) {
+        Output.debugPrint("OS.contextSwitcher is not the new curRun, starting the former...");
+        conSwi.start();
+      } else {
+        Output.debugPrint("OS.contextSwitcher is the new curRun, so it's already started...");
+      }
+    }
   }
 }

@@ -40,9 +40,40 @@ public class Scheduler {
     this.hiddenQueue = new ArrayList<>();
   }
 
+  public PCB getCurrentlyRunningSafe() {
+    try {
+      return preGetCurrentlyRunning()
+          .orElseThrow(
+              () ->
+                  new RuntimeException(
+                      Output.getErrorString("Expected Scheduler.currentlyRunning to not be null")));
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
+  }
+
   public void switchProcess() {
-    preGetCurrentlyRunning().ifPresent(this::wqAdd);
-    preSetCurrentlyRunning(wqGetRand());
+    PCB oldCurRun = getCurrentlyRunningSafe();
+    PCB chosenProcess = wqGetRand();
+    Output.debugPrint(
+        """
+                    If the chosen process doesn't equal the old curRun,
+                    the current switch-process operation should result in
+                    the old curRun stopping and being added to the wq""");
+    if (chosenProcess != oldCurRun) {
+      Output.debugPrint(
+          """
+                      The chosen process doesn't equal the old curRun;
+                      setting shouldStopFromSwitch to true on old curRun
+                      and adding it to the wq...""");
+      Output.debugPrint("");
+      oldCurRun.getUserlandProcess().setShouldStopFromSwitch(true);
+      wqAdd(oldCurRun);
+    } else {
+      Output.debugPrint("The chosen process does equal the old curRun; not adding or stopping...");
+    }
+    preSetCurrentlyRunning(chosenProcess);
   }
 
   public synchronized Optional<PCB> getCurrentlyRunning() {
@@ -76,11 +107,16 @@ public class Scheduler {
 
   public PCB wqGetRand() {
     Random r = new Random();
-    return wqBackground.get(r.nextInt(wqBackground.size()));
+    PCB randProcess = wqBackground.remove(r.nextInt(wqBackground.size()));
+    Output.debugPrint("The chosen process to switch to is " + randProcess.getThreadName());
+    Output.debugPrint(
+        "Removed " + randProcess.getThreadName() + " from wq because it won't be waiting anymore");
+    return randProcess;
   }
 
   public void startTimer() {
-    this.timer.schedule(
+    Output.debugPrint("Scheduling Timer...");
+    timer.schedule(
         new TimerTask() {
           @Override
           public void run() {

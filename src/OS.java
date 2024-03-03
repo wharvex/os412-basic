@@ -105,29 +105,21 @@ public class OS {
       // Save the value returned from the Kernel to the context switcher.
       getRetVal().ifPresent(cs::setContextSwitchRet);
     }
-    // If the contextSwitcher is NOT the currentlyRunning again, and the contextSwitcher is NOT the
-    // bootloader (which does not get registered as a currentlyRunning), then stop the
-    // contextSwitcher here until... TODO: until when??
-    Output.debugPrint("Checking if we should stop the contextSwitcher post-switch...");
-    try {
-      if (!(cs.getThreadName()
-              .equals(
-                  getKernel()
-                      .getScheduler()
-                      .preGetCurrentlyRunning()
-                      .orElseThrow(
-                          () ->
-                              new RuntimeException(
-                                  "The currentlyRunning should not be null after a contextSwitch."))
-                      .getThreadName())
-          || cs.getThreadName().equals("bootloaderThread"))) {
+    Output.debugPrint(
+        """
+                    Checking if we should stop the contextSwitcher due to
+                    being a UserlandProcess that is not the new currentlyRunning.
+                    Checking shouldStopFromSwitch set in Scheduler.switchContext.
+                    """);
+    if (cs instanceof UserlandProcess) {
+      if (((UserlandProcess) cs).getShouldStopFromSwitch()) {
+        ((UserlandProcess) cs).setShouldStopFromSwitch(false);
         cs.stop();
       } else {
-        Output.debugPrint("Continuing...");
+        Output.debugPrint("OS.contextSwitcher.shouldStopFromSwitch is false; continuing...");
       }
-    } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
-      throw e;
+    } else {
+      Output.debugPrint("OS.contextSwitcher is not a UserlandProcess; continuing...");
     }
   }
 
@@ -304,6 +296,10 @@ public class OS {
       throw e;
     }
     callType = ct;
+  }
+
+  public static void switchProcess(UnprivilegedContextSwitcher ucs) {
+    switchContext(ucs, CallType.SWITCH_PROCESS);
   }
 
   public enum CallType {

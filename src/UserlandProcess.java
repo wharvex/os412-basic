@@ -8,14 +8,16 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   private final Semaphore semaphore;
   private final Thread thread;
   private final List<Object> csRets;
-  private boolean stopRequested;
+  private boolean shouldStopFromTimeout;
+  private boolean shouldStopFromSwitch;
 
   public UserlandProcess(String debugPid, String threadNameBase) {
     this.debugPid = debugPid;
     thread = new Thread(this, threadNameBase + "Thread_" + debugPid);
     semaphore = new Semaphore(0);
     csRets = new ArrayList<>();
-    stopRequested = false;
+    shouldStopFromTimeout = false;
+    shouldStopFromSwitch = false;
   }
 
   /** Only called by Timer thread via PCB. */
@@ -24,13 +26,13 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   }
 
   public synchronized boolean isStopRequested() {
-    Output.debugPrint("stopRequested is " + stopRequested);
-    return stopRequested;
+    Output.debugPrint("stopRequested is " + shouldStopFromTimeout);
+    return shouldStopFromTimeout;
   }
 
   public synchronized void setStopRequested(boolean isRequested) {
     Output.debugPrint("Setting stopRequested to " + isRequested);
-    stopRequested = isRequested;
+    shouldStopFromTimeout = isRequested;
   }
 
   public void preSetStopRequested(boolean isRequested) {
@@ -44,11 +46,8 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   }
 
   public void cooperate() {
-    // Eventually: Check isStopRequested. If it's true, set it to false and call OS.switchProcess.
-    // For now: Check isStopRequested. If it's true, set it to false and stop.
     if (preIsStopRequested()) {
-      preSetStopRequested(false);
-      stop();
+      OS.switchProcess(this);
     }
   }
 
@@ -83,5 +82,13 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   @Override
   public void csRetsAdd(Object ret) {
     csRets.add(ret);
+  }
+
+  public boolean getShouldStopFromSwitch() {
+    return shouldStopFromSwitch;
+  }
+
+  public void setShouldStopFromSwitch(boolean shouldStopFromSwitch) {
+    this.shouldStopFromSwitch = shouldStopFromSwitch;
   }
 }
