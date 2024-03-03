@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * KERNELLAND
@@ -43,6 +40,11 @@ public class Scheduler {
     this.hiddenQueue = new ArrayList<>();
   }
 
+  public void switchProcess() {
+    preGetCurrentlyRunning().ifPresent(this::wqAdd);
+    preSetCurrentlyRunning(wqGetRand());
+  }
+
   public synchronized Optional<PCB> getCurrentlyRunning() {
     Output.debugPrint(
         "Scheduler.currentlyRunning is "
@@ -67,6 +69,16 @@ public class Scheduler {
     setCurrentlyRunning(currentlyRunning);
   }
 
+  public void wqAdd(PCB pcb) {
+    Output.debugPrint("Adding " + pcb.getThreadName() + " to wq");
+    wqBackground.add(pcb);
+  }
+
+  public PCB wqGetRand() {
+    Random r = new Random();
+    return wqBackground.get(r.nextInt(wqBackground.size()));
+  }
+
   public void startTimer() {
     this.timer.schedule(
         new TimerTask() {
@@ -75,22 +87,14 @@ public class Scheduler {
             Output.debugPrint("Starting");
             preGetCurrentlyRunning()
                 .ifPresentOrElse(
-                    cr -> {
-                      Output.debugPrint("Scheduler.currentlyRunning is " + cr);
-                      Output.debugPrint(
-                          "currentlyRunning.stopRequested is " + cr.isStopRequested());
-                      cr.stop();
-                      preSetCurrentlyRunning(null);
-                    },
+                    PCB::stop,
                     () -> {
-                      Output.debugPrint("Scheduler.currentlyRunning is null");
                       Output.debugPrint(
-                          "bootloaderThread is "
-                              + ThreadHelper.getThreadStateString("bootloaderThread"));
+                          "Bootloader is " + ThreadHelper.getThreadStateString("bootloaderThread"));
                       Output.debugPrint(
-                          "mainThread is " + ThreadHelper.getThreadStateString("mainThread"));
+                          "Main is " + ThreadHelper.getThreadStateString("mainThread"));
                       Output.debugPrint(
-                          "kernelThread is " + ThreadHelper.getThreadStateString("kernelThread"));
+                          "Kernel is " + ThreadHelper.getThreadStateString("kernelThread"));
                     });
           }
         },

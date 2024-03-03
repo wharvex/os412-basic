@@ -11,7 +11,7 @@ public class SleepyProcess extends UserlandProcess {
     int i = 0;
     while (true) {
       Output.print("Hello from Sleepy " + getDebugPid() + " (times printed: " + (++i) + ")");
-      OS.sleep(this, 500);
+      ThreadHelper.threadSleep(1000);
       cooperate();
     }
   }

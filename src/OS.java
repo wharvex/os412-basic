@@ -105,13 +105,37 @@ public class OS {
       // Save the value returned from the Kernel to the context switcher.
       getRetVal().ifPresent(cs::setContextSwitchRet);
     }
+    // If the contextSwitcher is NOT the currentlyRunning again, and the contextSwitcher is NOT the
+    // bootloader (which does not get registered as a currentlyRunning), then stop the
+    // contextSwitcher here until... TODO: until when??
+    Output.debugPrint("Checking if we should stop the contextSwitcher post-switch...");
+    try {
+      if (!(cs.getThreadName()
+              .equals(
+                  getKernel()
+                      .getScheduler()
+                      .preGetCurrentlyRunning()
+                      .orElseThrow(
+                          () ->
+                              new RuntimeException(
+                                  "The currentlyRunning should not be null after a contextSwitch."))
+                      .getThreadName())
+          || cs.getThreadName().equals("bootloaderThread"))) {
+        cs.stop();
+      } else {
+        Output.debugPrint("Continuing...");
+      }
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
   }
 
   private static void setParams(Object... newParams) {
-    // The params list will be empty after this call returns.
+    // The params list will be empty (size = 0) after this call returns.
     params.clear();
 
-    // Check if any of the newParams are null.
+    // Throw an exception if any of the new params are null and log the exception.
     try {
       if (Arrays.stream(newParams).anyMatch(Objects::isNull)) {
         throw new RuntimeException(
@@ -133,6 +157,7 @@ public class OS {
    * @return
    */
   public static Object getParam(int idx) {
+    // Throw an exception if the param index is out of range and log the exception.
     try {
       if (idx < 0 || idx >= params.size()) {
         throw new RuntimeException(Output.getErrorString("Param index " + idx + " out of range."));
@@ -141,7 +166,11 @@ public class OS {
       Output.writeToFile(e.toString());
       throw e;
     }
+
+    // Get the param.
     Object param = params.get(idx);
+
+    // Throw an exception if the param is null and log the exception.
     try {
       Objects.requireNonNull(
           param, Output.getErrorString("Tried to get param at index " + idx + " but it was null."));
@@ -149,6 +178,8 @@ public class OS {
       Output.writeToFile(e.toString());
       throw e;
     }
+
+    // Return the param.
     return param;
   }
 

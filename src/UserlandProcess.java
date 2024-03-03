@@ -21,7 +21,6 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   /** Only called by Timer thread via PCB. */
   public void requestStop() {
     preSetStopRequested(true);
-    // Wait here for process to stop.
   }
 
   public synchronized boolean isStopRequested() {

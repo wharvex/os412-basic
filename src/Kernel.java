@@ -27,10 +27,20 @@ public class Kernel implements Stoppable, Runnable, Device {
     return thread;
   }
 
+  private PCB createPCB(UserlandProcess up, OS.PriorityType pt) {
+    PCB pcb = new PCB(up, pt);
+    Output.debugPrint(
+        OS.preGetContextSwitcher().getThreadName()
+            + "'s request to create "
+            + up.getThreadName()
+            + " is fulfilled");
+    return pcb;
+  }
+
   private void startupCreateProcess() {
     UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
     OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
-    PCB pcb = new PCB(processCreator, pt);
+    PCB pcb = createPCB(processCreator, pt);
     pcb.init();
     pcb.start();
     OS.setRetValOnOS(pcb.getPid());
@@ -41,13 +51,10 @@ public class Kernel implements Stoppable, Runnable, Device {
   private void createProcess() {
     UserlandProcess up = (UserlandProcess) OS.getParam(0);
     OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
-    PCB pcb = new PCB(up, pt);
+    PCB pcb = createPCB(up, pt);
     pcb.init();
-    Output.debugPrint(
-        OS.getContextSwitcher().getThreadName()
-            + "'s request to create "
-            + pcb.getUserlandProcess().getThreadName()
-            + " fulfilled");
+    getScheduler().wqAdd(pcb);
+    getScheduler().switchProcess();
   }
 
   @Override
@@ -59,6 +66,26 @@ public class Kernel implements Stoppable, Runnable, Device {
         case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
         case OS.CallType.CREATE_PROCESS -> createProcess();
       }
+      getScheduler()
+          .preGetCurrentlyRunning()
+          .ifPresentOrElse(
+              cr -> {
+                Output.debugPrint(
+                    "Checking if currentlyRunning is contextSwitcher and callType is"
+                        + " STARTUP_CREATE_PROCESS...");
+                if (!cr.getThreadName().equals(OS.preGetContextSwitcher().getThreadName())
+                    && OS.getCallType() != OS.CallType.STARTUP_CREATE_PROCESS) {
+                  cr.start();
+                } else {
+                  Output.debugPrint(
+                      "currentlyRunning is contextSwitcher or callType is STARTUP_CREATE_PROCESS,"
+                          + " so currentlyRunning was not started");
+                }
+              },
+              () -> {
+                throw new RuntimeException(
+                    "currentlyRunning should not be null at the end of the Kernel's iteration");
+              });
       OS.startContextSwitcher();
     }
   }
