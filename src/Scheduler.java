@@ -67,11 +67,13 @@ public class Scheduler {
                       The chosen process doesn't equal the old curRun;
                       setting shouldStopFromSwitch to true on old curRun
                       and adding it to the wq...""");
-      Output.debugPrint("");
       oldCurRun.getUserlandProcess().setShouldStopFromSwitch(true);
       wqAdd(oldCurRun);
     } else {
-      Output.debugPrint("The chosen process does equal the old curRun; not adding or stopping...");
+      Output.debugPrint(
+          "The chosen process does equal the old curRun; not adding or stopping;\n"
+              + "setting old CR's UP's shouldStopFromSwitch to false...");
+      oldCurRun.getUserlandProcess().setShouldStopFromSwitch(false);
     }
     preSetCurrentlyRunning(chosenProcess);
   }

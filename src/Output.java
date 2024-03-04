@@ -9,7 +9,7 @@ import java.nio.file.Path;
 public class Output {
   public static void debugPrint(String baseStr) {
     String printStr = "\nDEBUG OUTPUT from " + Thread.currentThread().getName() + ": " + baseStr;
-    System.out.println(printStr);
+    //    System.out.println(printStr);
     writeToFile(printStr);
   }
 

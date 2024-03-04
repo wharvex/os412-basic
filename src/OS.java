@@ -112,9 +112,17 @@ public class OS {
                     Checking shouldStopFromSwitch set in Scheduler.switchContext.
                     """);
     if (cs instanceof UserlandProcess) {
+      Output.debugPrint("OS.contextSwitcher is a UserlandProcess");
       if (((UserlandProcess) cs).getShouldStopFromSwitch()) {
+        Output.debugPrint(
+            "OS.contextSwitcher.shouldStopFromSwitch is true;"
+                + "setting it to false and stopping the contextSwitcher");
         ((UserlandProcess) cs).setShouldStopFromSwitch(false);
         cs.stop();
+      } else if (((UserlandProcess) cs).getShouldStopFromSwitch() == null) {
+        // TODO: This might never print
+        Output.debugPrint(
+            "OS.contextSwitcher.shouldStopFromSwitch has not been set yet; continuing...");
       } else {
         Output.debugPrint("OS.contextSwitcher.shouldStopFromSwitch is false; continuing...");
       }

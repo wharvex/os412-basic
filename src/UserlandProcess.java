@@ -9,7 +9,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   private final Thread thread;
   private final List<Object> csRets;
   private boolean shouldStopFromTimeout;
-  private boolean shouldStopFromSwitch;
+  private Boolean shouldStopFromSwitch;
 
   public UserlandProcess(String debugPid, String threadNameBase) {
     this.debugPid = debugPid;
@@ -17,7 +17,6 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     semaphore = new Semaphore(0);
     csRets = new ArrayList<>();
     shouldStopFromTimeout = false;
-    shouldStopFromSwitch = false;
   }
 
   /** Only called by Timer thread via PCB. */
@@ -84,7 +83,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     csRets.add(ret);
   }
 
-  public boolean getShouldStopFromSwitch() {
+  public Boolean getShouldStopFromSwitch() {
     return shouldStopFromSwitch;
   }
 
