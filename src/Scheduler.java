@@ -32,12 +32,12 @@ public class Scheduler {
   private PCB currentlyRunning;
 
   public Scheduler() {
-    this.timer = new Timer("timerThread");
-    this.wqRealtime = new ArrayList<>();
-    this.wqInteractive = new ArrayList<>();
-    this.wqBackground = new ArrayList<>();
-    this.sleepingQueue = new ArrayList<>();
-    this.hiddenQueue = new ArrayList<>();
+    timer = new Timer("timerThread");
+    wqRealtime = new ArrayList<>();
+    wqInteractive = new ArrayList<>();
+    wqBackground = new ArrayList<>();
+    sleepingQueue = new ArrayList<>();
+    hiddenQueue = new ArrayList<>();
   }
 
   public PCB getCurrentlyRunningSafe() {
@@ -104,16 +104,29 @@ public class Scheduler {
 
   public void wqAdd(PCB pcb) {
     Output.debugPrint("Adding " + pcb.getThreadName() + " to wq");
-    wqBackground.add(pcb);
+    wqGet().add(pcb);
+  }
+
+  private void wqRemove(int idx) {
+    PCB removed = wqGet().remove(idx);
+    Output.debugPrint("Removed " + removed.getThreadName() + " from wq");
+  }
+
+  private List<PCB> wqGet() {
+    return wqBackground;
+  }
+
+  private PCB wqGetFrom(int idx) {
+    return wqGet().get(idx);
   }
 
   public PCB wqGetRand() {
     Random r = new Random();
-    PCB randProcess = wqBackground.remove(r.nextInt(wqBackground.size()));
-    Output.debugPrint("The chosen process to switch to is " + randProcess.getThreadName());
-    Output.debugPrint(
-        "Removed " + randProcess.getThreadName() + " from wq because it won't be waiting anymore");
-    return randProcess;
+    int chosenIdx = r.nextInt(wqGet().size());
+    PCB chosenProcess = wqGetFrom(chosenIdx);
+    Output.debugPrint("The chosen process to switch to is " + chosenProcess.getThreadName());
+    wqRemove(chosenIdx);
+    return chosenProcess;
   }
 
   public void startTimer() {

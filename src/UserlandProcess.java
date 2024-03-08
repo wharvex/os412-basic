@@ -45,7 +45,9 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   }
 
   public void cooperate() {
+    Output.debugPrint("Cooperating...");
     if (preIsStopRequested()) {
+      preSetStopRequested(false);
       OS.switchProcess(this);
     }
   }

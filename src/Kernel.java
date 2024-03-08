@@ -108,7 +108,9 @@ public class Kernel implements Stoppable, Runnable, Device {
     Output.debugPrint("Initting");
     while (true) {
       stop();
-      switch (OS.getCallType()) {
+      var ct = OS.getCallType();
+      Output.debugPrint("Handling CallType " + ct);
+      switch (ct) {
         case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
         case OS.CallType.CREATE_PROCESS -> createProcess();
         case OS.CallType.SWITCH_PROCESS -> getScheduler().switchProcess();

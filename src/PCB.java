@@ -80,10 +80,6 @@ public class PCB {
     incrementTimeoutsCounter();
   }
 
-  public boolean isStopRequested() {
-    return getUserlandProcess().preIsStopRequested();
-  }
-
   /** Only called by timer thread. */
   private void incrementTimeoutsCounter() {
     setTimeoutsCounter(getTimeoutsCounter() + 1);
