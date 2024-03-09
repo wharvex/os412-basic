@@ -139,6 +139,10 @@ public class Scheduler {
     }
   }
 
+  public int getPid() {
+    return getCurrentlyRunningSafe().getPid();
+  }
+
   public void startTimer() {
     Output.debugPrint("Scheduling Timer...");
     timer.schedule(
@@ -173,6 +177,15 @@ public class Scheduler {
 
   public void addToPcbByPidComplete(PCB pcb, int pid) {
     getPcbByPidComplete().put(pid, pcb);
+    Output.debugPrint("Added " + pcb.getThreadName() + " to pcbByPidComplete");
+    getPcbByPidComplete()
+        .forEach(
+            (key, value) ->
+                Output.debugPrint(
+                    "Contents of pcbByPidComplete -- Key "
+                        + key
+                        + "; Value "
+                        + value.getThreadName()));
   }
 
   public enum PriorityType {

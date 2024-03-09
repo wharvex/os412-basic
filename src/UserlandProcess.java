@@ -47,7 +47,6 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   public void cooperate() {
     Output.debugPrint("Cooperating...");
     if (preIsStopRequested()) {
-      preSetStopRequested(false);
       OS.switchProcess(this);
     }
   }
@@ -91,5 +90,12 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
 
   public void setShouldStopFromSwitch(boolean shouldStopFromSwitch) {
     this.shouldStopFromSwitch = shouldStopFromSwitch;
+  }
+
+  public void waitUntilStoppedByRequest() {
+    while (preIsStopRequested()) {
+      Output.debugPrint("Waiting for " + getThreadName() + " to stop from request");
+      ThreadHelper.threadSleep(10);
+    }
   }
 }

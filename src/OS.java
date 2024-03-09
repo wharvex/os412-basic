@@ -135,9 +135,14 @@ public class OS {
       Output.debugPrint("OS.contextSwitcher is a UserlandProcess");
       if (((UserlandProcess) cs).getShouldStopFromSwitch()) {
         Output.debugPrint(
-            "OS.contextSwitcher.shouldStopFromSwitch is true;"
-                + "setting it to false and stopping the contextSwitcher");
+            """
+                        OS.contextSwitcher.shouldStopFromSwitch is true;
+                        setting it to false and stopping the contextSwitcher;
+                        setting shouldStopFromTimeout to false;
+                        this is where a UserlandProcess stops due to timeout.
+                        """);
         ((UserlandProcess) cs).setShouldStopFromSwitch(false);
+        ((UserlandProcess) cs).preSetStopRequested(false);
         cs.stop();
       } else if (((UserlandProcess) cs).getShouldStopFromSwitch() == null) {
         // TODO: This might never happen
