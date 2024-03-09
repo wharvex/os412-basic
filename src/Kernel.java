@@ -29,7 +29,8 @@ public class Kernel implements Stoppable, Runnable, Device {
 
   private PCB createPCB(UserlandProcess up, Scheduler.PriorityType pt) {
     PCB pcb = new PCB(up, pt);
-    Output.debugPrint("Request to create " + up.getThreadName() + " is fulfilled");
+    Output.debugPrint(up.getThreadName() + " has now been created");
+    getScheduler().addToPcbByPidComplete(pcb, pcb.getPid());
     return pcb;
   }
 

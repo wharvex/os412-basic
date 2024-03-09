@@ -127,11 +127,16 @@ public class Scheduler {
   }
 
   public int getPidByName(String name) {
-    return wqGet().stream()
-        .filter(pcb -> pcb.getThreadName().equals(name))
-        .findFirst()
-        .orElseThrow(() -> new RuntimeException("No such number... No such zone..."))
-        .getPid();
+    try {
+      return getPcbByPidComplete().entrySet().stream()
+          .filter(e -> e.getValue().getThreadName().equals(name))
+          .findFirst()
+          .orElseThrow(() -> new RuntimeException("No such thread name"))
+          .getKey();
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
   }
 
   public void startTimer() {
@@ -156,6 +161,18 @@ public class Scheduler {
         },
         1000,
         1000);
+  }
+
+  public HashMap<Integer, PCB> getPcbByPidComplete() {
+    return pcbByPidComplete;
+  }
+
+  public PCB getFromPcbByPidComplete(int pid) {
+    return getPcbByPidComplete().get(pid);
+  }
+
+  public void addToPcbByPidComplete(PCB pcb, int pid) {
+    getPcbByPidComplete().put(pid, pcb);
   }
 
   public enum PriorityType {
