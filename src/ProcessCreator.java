@@ -13,7 +13,7 @@ public class ProcessCreator extends UserlandProcess {
       Output.debugPrint("Main is " + ThreadHelper.getThreadStateString("mainThread"));
       Output.debugPrint("Kernel is " + ThreadHelper.getThreadStateString("kernelThread"));
       Output.debugPrint("Timer is " + ThreadHelper.getThreadStateString("timerThread"));
-      OS.createProcess(this, new SleepyProcess(), OS.PriorityType.INTERACTIVE);
+      OS.createProcess(this, new SleepyProcess(), Scheduler.PriorityType.INTERACTIVE);
       cooperate();
       ThreadHelper.threadSleep(1000);
     }

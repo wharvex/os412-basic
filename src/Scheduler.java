@@ -6,29 +6,25 @@ import java.util.*;
  * <p>Models an operating system process scheduler.
  */
 public class Scheduler {
-
   // The priority-appropriate waiting queues.
-
   private final ArrayList<PCB> wqRealtime;
   private final ArrayList<PCB> wqInteractive;
   private final ArrayList<PCB> wqBackground;
 
   // The sleeping queue.
-
   private final ArrayList<PCB> sleepingQueue;
 
-  // The hidden queue, where currentlyRunnings who shouldn't be given a chance to run again
-  // immediately after a context switch go.
+  // The hashmap for looking up a PCB by its PID that contains all living PCBs.
+  private final HashMap<Integer, PCB> pcbByPidComplete;
 
-  private final ArrayList<PCB> hiddenQueue;
+  // The hashmap for looking up a PCB by its PID that only contains PCBs waiting for a message.
+  private final HashMap<Integer, PCB> pcbByPidMessageWaiters;
 
   // The timer, which simulates the hardware-based timer that interrupts the CPU and makes switching
   // between processes possible.
-
   private final Timer timer;
 
   // The currently running process.
-
   private PCB currentlyRunning;
 
   public Scheduler() {
@@ -37,7 +33,8 @@ public class Scheduler {
     wqInteractive = new ArrayList<>();
     wqBackground = new ArrayList<>();
     sleepingQueue = new ArrayList<>();
-    hiddenQueue = new ArrayList<>();
+    pcbByPidComplete = new HashMap<>();
+    pcbByPidMessageWaiters = new HashMap<>();
   }
 
   public PCB getCurrentlyRunningSafe() {
@@ -159,5 +156,11 @@ public class Scheduler {
         },
         1000,
         1000);
+  }
+
+  public enum PriorityType {
+    REALTIME,
+    INTERACTIVE,
+    BACKGROUND
   }
 }

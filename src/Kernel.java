@@ -27,7 +27,7 @@ public class Kernel implements Stoppable, Runnable, Device {
     return thread;
   }
 
-  private PCB createPCB(UserlandProcess up, OS.PriorityType pt) {
+  private PCB createPCB(UserlandProcess up, Scheduler.PriorityType pt) {
     PCB pcb = new PCB(up, pt);
     Output.debugPrint("Request to create " + up.getThreadName() + " is fulfilled");
     return pcb;
@@ -35,7 +35,7 @@ public class Kernel implements Stoppable, Runnable, Device {
 
   private void startupCreateProcess() {
     UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
-    OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
+    Scheduler.PriorityType pt = (Scheduler.PriorityType) OS.getParam(1);
     PCB pcb = createPCB(processCreator, pt);
     pcb.init();
     getScheduler().preSetCurrentlyRunning(pcb);
@@ -45,7 +45,7 @@ public class Kernel implements Stoppable, Runnable, Device {
 
   private void createProcess() {
     UserlandProcess up = (UserlandProcess) OS.getParam(0);
-    OS.PriorityType pt = (OS.PriorityType) OS.getParam(1);
+    Scheduler.PriorityType pt = (Scheduler.PriorityType) OS.getParam(1);
     PCB pcb = createPCB(up, pt);
     pcb.init();
     getScheduler().wqAdd(pcb);

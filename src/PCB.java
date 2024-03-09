@@ -13,19 +13,16 @@ public class PCB {
   private static int nextPid = 0;
   private final UserlandProcess userlandProcess;
   private final int pid;
-  private OS.PriorityType priorityType;
-
-  // The Instant before which we should not wake up this PCB if it is sleeping.
-
-  private Instant wakeupAfter;
-
-  // How many times the Timer has stopped this PCB.
-
-  private int timeoutsCounter;
-
   private final List<KernelMessage> messages;
 
-  public PCB(UserlandProcess up, OS.PriorityType pt) {
+  // The Instant before which we should not wake up this PCB if it is sleeping.
+  private Scheduler.PriorityType priorityType;
+
+  // How many times the Timer has stopped this PCB.
+  private Instant wakeupAfter;
+  private int timeoutsCounter;
+
+  public PCB(UserlandProcess up, Scheduler.PriorityType pt) {
     userlandProcess = up;
     priorityType = pt;
 
@@ -57,7 +54,7 @@ public class PCB {
    *
    * @return
    */
-  public synchronized OS.PriorityType getPriorityType() {
+  public synchronized Scheduler.PriorityType getPriorityType() {
     return priorityType;
   }
 
@@ -66,7 +63,7 @@ public class PCB {
    *
    * @param priorityType
    */
-  public synchronized void setPriorityType(OS.PriorityType priorityType) {
+  public synchronized void setPriorityType(Scheduler.PriorityType priorityType) {
     this.priorityType = priorityType;
   }
 
@@ -98,10 +95,10 @@ public class PCB {
   }
 
   private void demote() {
-    if (getPriorityType() == OS.PriorityType.REALTIME) {
-      setPriorityType(OS.PriorityType.INTERACTIVE);
-    } else if (getPriorityType() == OS.PriorityType.INTERACTIVE) {
-      setPriorityType(OS.PriorityType.BACKGROUND);
+    if (getPriorityType() == Scheduler.PriorityType.REALTIME) {
+      setPriorityType(Scheduler.PriorityType.INTERACTIVE);
+    } else if (getPriorityType() == Scheduler.PriorityType.INTERACTIVE) {
+      setPriorityType(Scheduler.PriorityType.BACKGROUND);
     }
   }
 

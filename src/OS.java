@@ -24,7 +24,7 @@ public class OS {
     getKernel().init();
 
     // Create the ProcessCreator process; switch to it; return its pid.
-    return startupCreateProcess(cs, new ProcessCreator(), PriorityType.REALTIME);
+    return startupCreateProcess(cs, new ProcessCreator(), Scheduler.PriorityType.REALTIME);
   }
 
   /**
@@ -41,7 +41,7 @@ public class OS {
   public static void sleep(UnprivilegedContextSwitcher cs, long sleepLenInMillis) {}
 
   public static int startupCreateProcess(
-      UnprivilegedContextSwitcher cs, UserlandProcess processCreator, PriorityType pt) {
+      UnprivilegedContextSwitcher cs, UserlandProcess processCreator, Scheduler.PriorityType pt) {
     switchContext(cs, CallType.STARTUP_CREATE_PROCESS, processCreator, pt);
     try {
       return (int)
@@ -57,7 +57,7 @@ public class OS {
   }
 
   public static int createProcess(
-      UnprivilegedContextSwitcher cs, UserlandProcess up, PriorityType pt) {
+      UnprivilegedContextSwitcher cs, UserlandProcess up, Scheduler.PriorityType pt) {
     switchContext(cs, CallType.CREATE_PROCESS, up, pt);
     try {
       return (int)
@@ -66,6 +66,26 @@ public class OS {
                   () ->
                       new RuntimeException(
                           Output.getErrorString("Expected int retVal from createProcess")));
+    } catch (RuntimeException e) {
+      Output.writeToFile(e.toString());
+      throw e;
+    }
+  }
+
+  public static void sendMessage(UnprivilegedContextSwitcher cs, KernelMessage km) {
+    switchContext(cs, CallType.SEND_MESSAGE, km);
+  }
+
+  public static KernelMessage waitForMessage(UnprivilegedContextSwitcher cs) {
+    switchContext(cs, CallType.WAIT_FOR_MESSAGE);
+    try {
+      return (KernelMessage)
+          getRetVal()
+              .orElseThrow(
+                  () ->
+                      new RuntimeException(
+                          Output.getErrorString(
+                              "Expected KernelMessage retVal from waitForMessage")));
     } catch (RuntimeException e) {
       Output.writeToFile(e.toString());
       throw e;
@@ -309,12 +329,8 @@ public class OS {
     STARTUP_CREATE_PROCESS,
     CREATE_PROCESS,
     SWITCH_PROCESS,
-    SLEEP
-  }
-
-  public enum PriorityType {
-    REALTIME,
-    INTERACTIVE,
-    BACKGROUND
+    SLEEP,
+    WAIT_FOR_MESSAGE,
+    SEND_MESSAGE
   }
 }
