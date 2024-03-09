@@ -129,6 +129,14 @@ public class Scheduler {
     return chosenProcess;
   }
 
+  public int getPidByName(String name) {
+    return wqGet().stream()
+        .filter(pcb -> pcb.getThreadName().equals(name))
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No such number... No such zone..."))
+        .getPid();
+  }
+
   public void startTimer() {
     Output.debugPrint("Scheduling Timer...");
     timer.schedule(

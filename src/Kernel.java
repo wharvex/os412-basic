@@ -76,7 +76,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   @Override
   public int open(String s) {
     // TODO: Map this to the VFS ID somehow.
-    int userlandID = getScheduler().preGetCurrentlyRunning().orElseThrow().getPid();
+    int userlandID = getCurrentlyRunningSafe().getPid();
 
     int emptyPosition = getEmptyPosition();
     int vfsID = vfs.open(s);

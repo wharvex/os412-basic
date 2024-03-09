@@ -120,7 +120,7 @@ public class OS {
         ((UserlandProcess) cs).setShouldStopFromSwitch(false);
         cs.stop();
       } else if (((UserlandProcess) cs).getShouldStopFromSwitch() == null) {
-        // TODO: This might never print
+        // TODO: This might never happen
         Output.debugPrint(
             "OS.contextSwitcher.shouldStopFromSwitch has not been set yet; continuing...");
       } else {
@@ -209,11 +209,6 @@ public class OS {
 
   public static void startKernelOnly() {
     getKernel().start();
-  }
-
-  /** Only called by Kernel thread. */
-  public static void startContextSwitcher() {
-    preGetContextSwitcher().start();
   }
 
   /**

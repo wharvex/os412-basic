@@ -1,4 +1,6 @@
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,6 +23,8 @@ public class PCB {
 
   private int timeoutsCounter;
 
+  private final List<KernelMessage> messages;
+
   public PCB(UserlandProcess up, OS.PriorityType pt) {
     userlandProcess = up;
     priorityType = pt;
@@ -29,6 +33,7 @@ public class PCB {
     pid = PCB.nextPid++;
 
     timeoutsCounter = 0;
+    messages = new ArrayList<>();
   }
 
   public int getTimeoutsCounter() {
