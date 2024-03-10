@@ -105,7 +105,8 @@ public class OS {
    */
   public static void switchContext(
       UnprivilegedContextSwitcher cs, CallType callType, Object... params) {
-    Output.debugPrint("About to enter switchContext for " + callType);
+    Output.debugPrint(
+        Output.DebugOutputType.SYNC_BEFORE_ENTER, "Synced on: " + cs + "; CallType: " + callType);
     synchronized (cs) {
       // Announce our arrival.
       Output.debugPrint("Just entered switchContext for " + callType);
@@ -127,29 +128,31 @@ public class OS {
     }
     Output.debugPrint(
         """
+
+
                     Checking if we should stop the contextSwitcher due to
                     being a UserlandProcess that is not the new currentlyRunning.
-                    Checking shouldStopFromSwitch set in Scheduler.switchContext.
-                    """);
+                    Checking shouldStopAfterContextSwitch set in Scheduler.switchContext.""");
     if (cs instanceof UserlandProcess) {
       Output.debugPrint("OS.contextSwitcher is a UserlandProcess");
-      if (((UserlandProcess) cs).getShouldStopFromSwitch()) {
+      ((UserlandProcess) cs).preSetStopRequested(false);
+      if (((UserlandProcess) cs).getShouldStopAfterContextSwitch()) {
         Output.debugPrint(
             """
-                        OS.contextSwitcher.shouldStopFromSwitch is true;
-                        setting it to false and stopping the contextSwitcher;
-                        setting shouldStopFromTimeout to false;
-                        this is where a UserlandProcess stops due to timeout.
-                        """);
-        ((UserlandProcess) cs).setShouldStopFromSwitch(false);
-        ((UserlandProcess) cs).preSetStopRequested(false);
+
+
+                        OS.contextSwitcher.shouldStopAfterContextSwitch is true;
+                        setting it to false and stopping the contextSwitcher.
+                        This is where a UserlandProcess stops due to timeout.""");
+        ((UserlandProcess) cs).setShouldStopAfterContextSwitch(false);
         cs.stop();
-      } else if (((UserlandProcess) cs).getShouldStopFromSwitch() == null) {
+      } else if (((UserlandProcess) cs).getShouldStopAfterContextSwitch() == null) {
         // TODO: This might never happen
         Output.debugPrint(
-            "OS.contextSwitcher.shouldStopFromSwitch has not been set yet; continuing...");
+            "OS.contextSwitcher.shouldStopAfterContextSwitch has not been set yet; continuing...");
       } else {
-        Output.debugPrint("OS.contextSwitcher.shouldStopFromSwitch is false; continuing...");
+        Output.debugPrint(
+            "OS.contextSwitcher.shouldStopAfterContextSwitch is false; continuing...");
       }
     } else {
       Output.debugPrint("OS.contextSwitcher is not a UserlandProcess; continuing...");

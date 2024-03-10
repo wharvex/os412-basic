@@ -14,10 +14,8 @@ public class PCB {
   private final UserlandProcess userlandProcess;
   private final int pid;
   private final List<KernelMessage> messages;
-
   // The Instant before which we should not wake up this PCB if it is sleeping.
   private Scheduler.PriorityType priorityType;
-
   // How many times the Timer has stopped this PCB.
   private Instant wakeupAfter;
   private int timeoutsCounter;

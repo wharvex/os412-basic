@@ -9,7 +9,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   private final Thread thread;
   private final List<Object> csRets;
   private boolean shouldStopFromTimeout;
-  private Boolean shouldStopFromSwitch;
+  private Boolean shouldStopAfterContextSwitch;
 
   public UserlandProcess(String debugPid, String threadNameBase) {
     this.debugPid = debugPid;
@@ -40,7 +40,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   }
 
   public boolean preIsStopRequested() {
-    Output.debugPrint("About to enter isStopRequested");
+    Output.debugPrint("About to enter isStopRequested on " + getThreadName());
     return isStopRequested();
   }
 
@@ -84,12 +84,12 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     csRets.add(ret);
   }
 
-  public Boolean getShouldStopFromSwitch() {
-    return shouldStopFromSwitch;
+  public Boolean getShouldStopAfterContextSwitch() {
+    return shouldStopAfterContextSwitch;
   }
 
-  public void setShouldStopFromSwitch(boolean shouldStopFromSwitch) {
-    this.shouldStopFromSwitch = shouldStopFromSwitch;
+  public void setShouldStopAfterContextSwitch(boolean shouldStopAfterContextSwitch) {
+    this.shouldStopAfterContextSwitch = shouldStopAfterContextSwitch;
   }
 
   public void waitUntilStoppedByRequest() {
