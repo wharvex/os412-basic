@@ -6,5 +6,12 @@ public class Ping extends UserlandProcess {
   }
 
   @Override
-  void main() {}
+  void main() {
+    int i = 0;
+    while (true) {
+      Output.print("Hello from Ping " + getDebugPid() + " (times printed: " + (++i) + ")");
+      ThreadHelper.threadSleep(1000);
+      cooperate();
+    }
+  }
 }

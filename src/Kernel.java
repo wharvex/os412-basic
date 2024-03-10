@@ -127,7 +127,7 @@ public class Kernel implements Stoppable, Runnable, Device {
       newCurRun.start();
 
       // Check if we should start the UCS.
-      UnprivilegedContextSwitcher conSwi = OS.preGetContextSwitcher();
+      UnprivilegedContextSwitcher conSwi = OS.getContextSwitcher();
       Output.debugPrint(
           """
 

@@ -72,14 +72,18 @@ public class Scheduler {
       oldCurRun.getUserlandProcess().setShouldStopAfterContextSwitch(true);
     } else {
       Output.debugPrint(
-          "The chosen process does equal the old curRun; not adding or stopping;\n"
-              + "setting old CR's UP's shouldStopAfterContextSwitch to false...");
+          """
+
+
+                      The chosen process does equal the old curRun; not adding or stopping.
+                      setting old CR's UP's shouldStopAfterContextSwitch to false""");
       oldCurRun.getUserlandProcess().setShouldStopAfterContextSwitch(false);
     }
     preSetCurrentlyRunning(chosenProcess);
   }
 
   public synchronized Optional<PCB> getCurrentlyRunning() {
+    Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, this.toString());
     Output.debugPrint(
         "Scheduler.currentlyRunning is "
             + (currentlyRunning != null ? currentlyRunning.getThreadName() : "null"));
@@ -87,6 +91,7 @@ public class Scheduler {
   }
 
   public synchronized void setCurrentlyRunning(PCB currentlyRunning) {
+    Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, this.toString());
     Output.debugPrint(
         "Setting Scheduler.currentlyRunning to "
             + (currentlyRunning != null ? currentlyRunning.getThreadName() : "null"));
@@ -94,13 +99,16 @@ public class Scheduler {
   }
 
   public Optional<PCB> preGetCurrentlyRunning() {
-    Output.debugPrint("About to enter Scheduler.getCurrentlyRunning");
-    return getCurrentlyRunning();
+    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
+    var ret = getCurrentlyRunning();
+    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, this.toString());
+    return ret;
   }
 
   public void preSetCurrentlyRunning(PCB currentlyRunning) {
-    Output.debugPrint("About to enter Scheduler.setCurrentlyRunning");
+    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
     setCurrentlyRunning(currentlyRunning);
+    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, this.toString());
   }
 
   public void wqAdd(PCB pcb) {
@@ -160,6 +168,10 @@ public class Scheduler {
             Output.debugPrint("Starting");
             preGetCurrentlyRunning()
                 .ifPresentOrElse(
+                    // TODO: What happens if the currentlyRunning changes here?
+                    // OS will set shouldStopFromTimeout on the contextSwitcher (which is the
+                    // currentlyRunning we will have gotten here) to false, which will release the
+                    // Timer from its waiting loop.
                     PCB::stop,
                     () -> {
                       Output.debugPrint(

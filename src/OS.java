@@ -112,7 +112,7 @@ public class OS {
       Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, cs.toString());
 
       // Store a reference on OS to the Runnable whose thread is calling this method.
-      preSetContextSwitcher(cs);
+      setContextSwitcher(cs);
 
       // Set the call type for this context switch.
       setCallType(callType);
@@ -253,23 +253,7 @@ public class OS {
     retVal = rv;
   }
 
-  /**
-   * Unsynchronized caller of getContextSwitcher to facilitate debugging.
-   *
-   * @return
-   */
-  public static UnprivilegedContextSwitcher preGetContextSwitcher() {
-    Output.debugPrint("About to enter OS.getContextSwitcher");
-    return getContextSwitcher();
-  }
-
-  /**
-   * We do not rely on the Kernel's semaphore to guard contextSwitcher because other threads besides
-   * the Kernel's may want to read its contents. So we make its getters/setters synchronized.
-   *
-   * @return
-   */
-  public static synchronized UnprivilegedContextSwitcher getContextSwitcher() {
+  public static UnprivilegedContextSwitcher getContextSwitcher() {
     try {
       Objects.requireNonNull(
           contextSwitcher,
@@ -282,7 +266,7 @@ public class OS {
     return contextSwitcher;
   }
 
-  public static synchronized void setContextSwitcher(UnprivilegedContextSwitcher cs) {
+  public static void setContextSwitcher(UnprivilegedContextSwitcher cs) {
     try {
       Objects.requireNonNull(cs, Output.getErrorString("Cannot set OS.contextSwitcher to null"));
     } catch (NullPointerException e) {
@@ -291,16 +275,6 @@ public class OS {
     }
     Output.debugPrint("Setting OS.contextSwitcher to " + cs.getThreadName());
     contextSwitcher = cs;
-  }
-
-  /**
-   * Unsynchronized caller of setContextSwitcher to facilitate debugging.
-   *
-   * @param cs
-   */
-  public static void preSetContextSwitcher(UnprivilegedContextSwitcher cs) {
-    Output.debugPrint("About to enter OS.setContextSwitcher");
-    setContextSwitcher(cs);
   }
 
   public static CallType getCallType() {

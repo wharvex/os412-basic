@@ -6,5 +6,12 @@ public class Pong extends UserlandProcess {
   }
 
   @Override
-  void main() {}
+  void main() {
+    int i = 0;
+    while (true) {
+      Output.print("Hello from Pong " + getDebugPid() + " (times printed: " + (++i) + ")");
+      ThreadHelper.threadSleep(1000);
+      cooperate();
+    }
+  }
 }

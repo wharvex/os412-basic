@@ -8,14 +8,8 @@ public class Main {
     var bl = new Bootloader();
     bl.init();
     Scanner sc = new Scanner(System.in);
-    String userInput = "not x";
-    while (!userInput.equals("x")) {
-      userInput = sc.nextLine();
-      Output.debugPrint("USER INPUT: " + userInput);
-      if (userInput.equals("x")) {
-        Output.debugPrint("END EXECUTION TRACE");
-      }
-    }
+    while (!sc.nextLine().equals("x")) {}
+    Output.debugPrint("END EXECUTION TRACE");
     System.exit(0);
   }
 }

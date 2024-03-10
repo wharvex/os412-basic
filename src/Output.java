@@ -100,9 +100,9 @@ public class Output {
     STOP("Stopping"),
     START("Starting"),
     INIT("Initting"),
-    SYNC_BEFORE_ENTER("About to enter synchronized block. Synced on: "),
-    SYNC_ENTER("Just entered synchronized block. Synced on: "),
-    SYNC_LEAVE("Just left synchronized block. Synced on: ");
+    SYNC_BEFORE_ENTER("About to enter synchronized block. Synced on"),
+    SYNC_ENTER("Just entered synchronized block. Synced on"),
+    SYNC_LEAVE("Just left synchronized block. Synced on");
     private final String printStr; // price of each apple
 
     // Constructor
