@@ -109,18 +109,31 @@ public class Kernel implements Stoppable, Runnable, Device {
     Output.debugPrint("Initting");
     while (true) {
       stop();
+
+      // Announce the call type.
       var ct = OS.getCallType();
       Output.debugPrint("Handling CallType " + ct);
+
+      // Main run loop.
       switch (ct) {
         case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
         case OS.CallType.CREATE_PROCESS -> createProcess();
         case OS.CallType.SWITCH_PROCESS -> getScheduler().switchProcess();
       }
+
+      // Start the new currentlyRunning.
       PCB newCurRun = getCurrentlyRunningSafe();
       Output.debugPrint("Start the new currentlyRunning");
       newCurRun.start();
+
+      // Check if we should start the UCS.
       UnprivilegedContextSwitcher conSwi = OS.preGetContextSwitcher();
-      Output.debugPrint("If contextSwitcher is not the new curRun, start the contextSwitcher");
+      Output.debugPrint(
+          """
+
+
+                      If contextSwitcher is not the new curRun, start the contextSwitcher.
+                      We ensure this because if it is the new curRun, it was already started""");
       if (conSwi != newCurRun.getUserlandProcess()) {
         Output.debugPrint("OS.contextSwitcher is not the new curRun, starting the former...");
         conSwi.start();

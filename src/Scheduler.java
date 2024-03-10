@@ -52,20 +52,24 @@ public class Scheduler {
 
   public void switchProcess() {
     PCB oldCurRun = getCurrentlyRunningSafe();
+    wqAdd(oldCurRun);
     PCB chosenProcess = wqGetRand();
     Output.debugPrint(
         """
+
+
                     If the chosen process doesn't equal the old curRun,
                     the current switch-process operation should result in
                     the old curRun stopping and being added to the wq""");
     if (chosenProcess != oldCurRun) {
       Output.debugPrint(
           """
+
+
                       The chosen process doesn't equal the old curRun;
                       setting shouldStopAfterContextSwitch to true on old curRun
                       and adding it to the wq...""");
       oldCurRun.getUserlandProcess().setShouldStopAfterContextSwitch(true);
-      wqAdd(oldCurRun);
     } else {
       Output.debugPrint(
           "The chosen process does equal the old curRun; not adding or stopping;\n"
@@ -100,13 +104,17 @@ public class Scheduler {
   }
 
   public void wqAdd(PCB pcb) {
-    Output.debugPrint("Adding " + pcb.getThreadName() + " to wq");
     wqGet().add(pcb);
+    Output.debugPrint("Added " + pcb.getThreadName() + " to wq");
+    Output.debugPrint("Contents of wq:");
+    wqGet().forEach(wqElm -> Output.debugPrint(wqElm.getThreadName()));
   }
 
   private void wqRemove(int idx) {
     PCB removed = wqGet().remove(idx);
     Output.debugPrint("Removed " + removed.getThreadName() + " from wq");
+    Output.debugPrint("Contents of wq:");
+    wqGet().forEach(wqElm -> Output.debugPrint(wqElm.getThreadName()));
   }
 
   private List<PCB> wqGet() {

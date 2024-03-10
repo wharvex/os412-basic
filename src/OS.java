@@ -105,11 +105,11 @@ public class OS {
    */
   public static void switchContext(
       UnprivilegedContextSwitcher cs, CallType callType, Object... params) {
-    Output.debugPrint(
-        Output.DebugOutputType.SYNC_BEFORE_ENTER, "Synced on: " + cs + "; CallType: " + callType);
+    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, cs.toString());
+    Output.debugPrint("Call type: " + callType);
     synchronized (cs) {
       // Announce our arrival.
-      Output.debugPrint("Just entered switchContext for " + callType);
+      Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, cs.toString());
 
       // Store a reference on OS to the Runnable whose thread is calling this method.
       preSetContextSwitcher(cs);
@@ -126,6 +126,11 @@ public class OS {
       // Save the value returned from the Kernel to the context switcher.
       getRetVal().ifPresent(cs::setContextSwitchRet);
     }
+    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, cs.toString());
+
+    // The following is the logic that stops the context switcher if needed.
+    // We can't have this in the sync block because then the cs would stop while holding the lock.
+
     Output.debugPrint(
         """
 
