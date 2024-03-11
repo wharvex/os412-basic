@@ -18,13 +18,13 @@ public class OS {
    * @param cs
    * @return
    */
-  public static int startup(UnprivilegedContextSwitcher cs) {
+  public static void startup(UnprivilegedContextSwitcher cs) {
     // Create Kernel and start its thread.
     kernel = new Kernel();
     getKernel().init();
 
-    // Create the ProcessCreator process; switch to it; return its pid.
-    return startupCreateProcess(cs, new ProcessCreator(), Scheduler.PriorityType.REALTIME);
+    // Create the ProcessCreator process; switch to it; save its pid to the bootloader.
+    startupCreateProcess(cs, new ProcessCreator(), Scheduler.PriorityType.REALTIME);
   }
 
   /**
@@ -40,36 +40,14 @@ public class OS {
 
   public static void sleep(UnprivilegedContextSwitcher cs, long sleepLenInMillis) {}
 
-  public static int startupCreateProcess(
+  public static void startupCreateProcess(
       UnprivilegedContextSwitcher cs, UserlandProcess processCreator, Scheduler.PriorityType pt) {
     switchContext(cs, CallType.STARTUP_CREATE_PROCESS, processCreator, pt);
-    try {
-      return (int)
-          getRetVal()
-              .orElseThrow(
-                  () ->
-                      new RuntimeException(
-                          Output.getErrorString("Expected int retVal from startupCreateProcess")));
-    } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
-      throw e;
-    }
   }
 
-  public static int createProcess(
+  public static void createProcess(
       UnprivilegedContextSwitcher cs, UserlandProcess up, Scheduler.PriorityType pt) {
     switchContext(cs, CallType.CREATE_PROCESS, up, pt);
-    try {
-      return (int)
-          getRetVal()
-              .orElseThrow(
-                  () ->
-                      new RuntimeException(
-                          Output.getErrorString("Expected int retVal from createProcess")));
-    } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
-      throw e;
-    }
   }
 
   public static void sendMessage(UnprivilegedContextSwitcher cs, KernelMessage km) {
@@ -250,6 +228,7 @@ public class OS {
    * @param rv The kernelland function return value.
    */
   public static void setRetValOnOS(Object rv) {
+    Output.debugPrint("Setting OS.retVal to " + rv);
     retVal = rv;
   }
 

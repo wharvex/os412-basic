@@ -17,6 +17,7 @@ public class ProcessCreator extends UserlandProcess {
         OS.createProcess(this, new Pong(), Scheduler.PriorityType.INTERACTIVE);
       } else {
         Output.print("Done creating processes for now...");
+        Output.print("All my children's pids: " + getCsRets().toString());
       }
       Output.debugPrint("Bootloader is " + ThreadHelper.getThreadStateString("bootloaderThread"));
       Output.debugPrint("Main is " + ThreadHelper.getThreadStateString("mainThread"));

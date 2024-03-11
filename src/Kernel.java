@@ -50,6 +50,7 @@ public class Kernel implements Stoppable, Runnable, Device {
     PCB pcb = createPCB(up, pt);
     pcb.init();
     getScheduler().wqAdd(pcb);
+    OS.setRetValOnOS(pcb.getPid());
     getScheduler().switchProcess();
   }
 
@@ -118,7 +119,10 @@ public class Kernel implements Stoppable, Runnable, Device {
       switch (ct) {
         case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
         case OS.CallType.CREATE_PROCESS -> createProcess();
-        case OS.CallType.SWITCH_PROCESS -> getScheduler().switchProcess();
+        case OS.CallType.SWITCH_PROCESS -> {
+          OS.setRetValOnOS(null);
+          getScheduler().switchProcess();
+        }
       }
 
       // Start the new currentlyRunning.

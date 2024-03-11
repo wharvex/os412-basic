@@ -68,7 +68,7 @@ public class Scheduler {
 
                       The chosen process doesn't equal the old curRun;
                       setting shouldStopAfterContextSwitch to true on old curRun
-                      and adding it to the wq...""");
+                      and adding it to the wq""");
       oldCurRun.getUserlandProcess().setShouldStopAfterContextSwitch(true);
     } else {
       Output.debugPrint(

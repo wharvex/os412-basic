@@ -1,3 +1,5 @@
+import java.util.List;
+
 /**
  * MAINLAND
  *
@@ -10,17 +12,27 @@
  */
 public interface UnprivilegedContextSwitcher extends Stoppable {
 
-  Object csRetsGet(int idx);
+  List<Object> getCsRets();
+
+  default Object getFromCsRets(int idx) {
+    return getCsRets().get(idx);
+  }
+
+  default void addToCsRets(Object ret) {
+    getCsRets().add(ret);
+    Output.debugPrint("Saved " + ret + " to rets of " + getThreadName());
+  }
 
   /**
-   * This is called in {@link OS#switchContext(UnprivilegedContextSwitcher, OS.CallType, Object...)
-   * OS.switchContext} which is synchronized.
+   * This is called at the end of the synchronized block in {@link
+   * OS#switchContext(UnprivilegedContextSwitcher, OS.CallType, Object...) OS.switchContext} to
+   * ensure the UCS receives and saves its return value before a new context switch occurs.
    *
    * @param ret
    */
   default void setContextSwitchRet(Object ret) {
     if (ret != null) {
-      csRetsAdd(ret);
+      addToCsRets(ret);
     }
   }
 
@@ -28,8 +40,6 @@ public interface UnprivilegedContextSwitcher extends Stoppable {
   default boolean isStopped() {
     return Stoppable.super.isStopped();
   }
-
-  void csRetsAdd(Object ret);
 
   default boolean isDone() {
     return !getThread().isAlive();

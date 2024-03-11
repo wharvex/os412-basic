@@ -63,7 +63,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
 
   @Override
   public void run() {
-    Output.debugPrint("Initting");
+    Output.debugPrint(Output.DebugOutputType.INIT);
     stop();
     main();
   }
@@ -74,22 +74,17 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     return debugPid;
   }
 
-  @Override
-  public Object csRetsGet(int idx) {
-    return csRets.get(idx);
-  }
-
-  @Override
-  public void csRetsAdd(Object ret) {
-    csRets.add(ret);
-  }
-
   public Boolean getShouldStopAfterContextSwitch() {
     return shouldStopAfterContextSwitch;
   }
 
   public void setShouldStopAfterContextSwitch(boolean shouldStopAfterContextSwitch) {
     this.shouldStopAfterContextSwitch = shouldStopAfterContextSwitch;
+  }
+
+  @Override
+  public List<Object> getCsRets() {
+    return csRets;
   }
 
   public void waitUntilStoppedByRequest() {

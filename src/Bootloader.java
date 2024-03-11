@@ -25,13 +25,8 @@ public class Bootloader implements UnprivilegedContextSwitcher, Runnable {
   }
 
   @Override
-  public Object csRetsGet(int idx) {
-    return csRets.get(idx);
-  }
-
-  @Override
-  public void csRetsAdd(Object ret) {
-    csRets.add(ret);
+  public List<Object> getCsRets() {
+    return csRets;
   }
 
   @Override
@@ -42,6 +37,6 @@ public class Bootloader implements UnprivilegedContextSwitcher, Runnable {
   @Override
   public void run() {
     Output.debugPrint("Initting");
-    setContextSwitchRet(OS.startup(this));
+    OS.startup(this);
   }
 }
