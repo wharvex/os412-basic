@@ -7,6 +7,7 @@ import java.nio.file.Path;
 
 /** MAINLAND */
 public class Output {
+  // StackWalker requires Java 9+.
   private static StackWalker.StackFrame getFrame() {
     return StackWalker.getInstance()
         .walk(

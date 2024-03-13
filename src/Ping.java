@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.UUID;
 
 public class Ping extends UserlandProcess {
@@ -13,5 +14,10 @@ public class Ping extends UserlandProcess {
       ThreadHelper.threadSleep(1000);
       cooperate();
     }
+  }
+
+  @Override
+  public List<KernelMessage> getMessages() {
+    return null;
   }
 }

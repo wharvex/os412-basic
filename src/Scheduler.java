@@ -10,6 +10,8 @@ public class Scheduler {
   private final ArrayList<PCB> wqRealtime;
   private final ArrayList<PCB> wqInteractive;
   private final ArrayList<PCB> wqBackground;
+  private final ArrayList<KernelMessage> waitingMessages;
+  private final ArrayList<PCB> waitingRecipients;
 
   // The sleeping queue.
   private final ArrayList<PCB> sleepingQueue;
@@ -35,6 +37,8 @@ public class Scheduler {
     sleepingQueue = new ArrayList<>();
     pcbByPidComplete = new HashMap<>();
     pcbByPidMessageWaiters = new HashMap<>();
+    waitingMessages = new ArrayList<>();
+    waitingRecipients = new ArrayList<>();
   }
 
   public PCB getCurrentlyRunningSafe() {
@@ -206,6 +210,31 @@ public class Scheduler {
                         + key
                         + "; Value "
                         + value.getThreadName()));
+  }
+
+  public ArrayList<KernelMessage> getWaitingMessages() {
+    return waitingMessages;
+  }
+
+  public ArrayList<PCB> getWaitingRecipients() {
+    return waitingRecipients;
+  }
+
+  public void addToWaitingMessages(KernelMessage km) {
+    getWaitingMessages().add(km);
+    Output.debugPrint("waitingMessages contents: " + getWaitingMessages());
+  }
+
+  public void addToWaitingRecipients(PCB pcb) {
+    getWaitingRecipients().add(pcb);
+  }
+
+  public PCB getFromWaitingRecipients(int idx) {
+    return getWaitingRecipients().get(idx);
+  }
+
+  public KernelMessage getFromWaitingMessages(int idx) {
+    return getWaitingMessages().get(idx);
   }
 
   public enum PriorityType {

@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * MAINLAND
@@ -14,6 +15,8 @@ public interface UnprivilegedContextSwitcher extends Stoppable {
 
   List<Object> getCsRets();
 
+  List<KernelMessage> getMessages();
+
   default Object getFromCsRets(int idx) {
     return getCsRets().get(idx);
   }
@@ -24,20 +27,24 @@ public interface UnprivilegedContextSwitcher extends Stoppable {
   }
 
   /**
-   * This is called at the end of the synchronized block in {@link
+   * This is called at the end of the synchronized block (still in the block) in {@link
    * OS#switchContext(UnprivilegedContextSwitcher, OS.CallType, Object...) OS.switchContext} to
    * ensure the UCS receives and saves its return value before a new context switch occurs.
    *
    * @param ret
    */
   default void setContextSwitchRet(Object ret) {
-    if (ret != null) {
-      addToCsRets(ret);
-    }
+    addToCsRets(ret);
+  }
+
+  default void setContextSwitchRet(
+      BiConsumer<UnprivilegedContextSwitcher, Object> retSaver, Object ret) {
+    retSaver.accept(this, ret);
   }
 
   @Override
   default boolean isStopped() {
+    // We can add UCS-specific stuff here.
     return Stoppable.super.isStopped();
   }
 

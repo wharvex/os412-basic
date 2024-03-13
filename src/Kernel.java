@@ -111,16 +111,33 @@ public class Kernel implements Stoppable, Runnable, Device {
     while (true) {
       stop();
 
-      // Announce the call type.
+      // Announce the call type and context switcher.
       var ct = OS.getCallType();
-      Output.debugPrint("Handling CallType " + ct);
+      UnprivilegedContextSwitcher ucs = OS.getContextSwitcher();
+      Output.debugPrint("Handling CallType " + ct + " from " + ucs.getThreadName());
 
       // Main run loop.
       switch (ct) {
-        case OS.CallType.STARTUP_CREATE_PROCESS -> startupCreateProcess();
-        case OS.CallType.CREATE_PROCESS -> createProcess();
-        case OS.CallType.SWITCH_PROCESS -> {
+        case STARTUP_CREATE_PROCESS -> startupCreateProcess();
+        case CREATE_PROCESS -> createProcess();
+        case SWITCH_PROCESS -> {
           OS.setRetValOnOS(null);
+          getScheduler().switchProcess();
+        }
+        case SEND_MESSAGE -> {
+          // Get the message from Userland.
+          KernelMessage userlandKM = (KernelMessage) OS.getParam(0);
+
+          // Set sender pid on the message.
+          userlandKM.setSenderPid(getScheduler().getPidByName(ucs.getThreadName()));
+
+          // Add message to Scheduler's waiting messages queue.
+          getScheduler().addToWaitingMessages(new KernelMessage(userlandKM));
+
+          // Set context switch ret val.
+          OS.setRetValOnOS(null);
+
+          // Give another process a chance to run.
           getScheduler().switchProcess();
         }
       }
@@ -131,16 +148,15 @@ public class Kernel implements Stoppable, Runnable, Device {
       newCurRun.start();
 
       // Check if we should start the UCS.
-      UnprivilegedContextSwitcher conSwi = OS.getContextSwitcher();
       Output.debugPrint(
           """
 
 
                       If contextSwitcher is not the new curRun, start the contextSwitcher.
                       We ensure this because if it is the new curRun, it was already started""");
-      if (conSwi != newCurRun.getUserlandProcess()) {
+      if (ucs != newCurRun.getUserlandProcess()) {
         Output.debugPrint("OS.contextSwitcher is not the new curRun, starting the former...");
-        conSwi.start();
+        ucs.start();
       } else {
         Output.debugPrint("OS.contextSwitcher is the new curRun, so it's already started...");
       }

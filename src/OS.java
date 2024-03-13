@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.function.BiConsumer;
 
 /**
  * OSLAND
@@ -46,28 +47,19 @@ public class OS {
   }
 
   public static void createProcess(
-      UnprivilegedContextSwitcher cs, UserlandProcess up, Scheduler.PriorityType pt) {
-    switchContext(cs, CallType.CREATE_PROCESS, up, pt);
+      UnprivilegedContextSwitcher cs,
+      UserlandProcess up,
+      Scheduler.PriorityType pt,
+      BiConsumer<UnprivilegedContextSwitcher, Object> retSaver) {
+    switchContext(cs, CallType.CREATE_PROCESS, retSaver, up, pt);
   }
 
   public static void sendMessage(UnprivilegedContextSwitcher cs, KernelMessage km) {
     switchContext(cs, CallType.SEND_MESSAGE, km);
   }
 
-  public static KernelMessage waitForMessage(UnprivilegedContextSwitcher cs) {
+  public static void waitForMessage(UnprivilegedContextSwitcher cs) {
     switchContext(cs, CallType.WAIT_FOR_MESSAGE);
-    try {
-      return (KernelMessage)
-          getRetVal()
-              .orElseThrow(
-                  () ->
-                      new RuntimeException(
-                          Output.getErrorString(
-                              "Expected KernelMessage retVal from waitForMessage")));
-    } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
-      throw e;
-    }
   }
 
   /**
@@ -102,7 +94,7 @@ public class OS {
       startKernel(cs);
 
       // Save the value returned from the Kernel to the context switcher.
-      getRetVal().ifPresent(cs::setContextSwitchRet);
+      getRetVal().ifPresent(cs::addToCsRets);
     }
     Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, cs.toString());
 
@@ -127,6 +119,70 @@ public class OS {
                         OS.contextSwitcher.shouldStopAfterContextSwitch is true;
                         setting it to false and stopping the contextSwitcher.
                         This is where a UserlandProcess stops due to timeout.""");
+        ((UserlandProcess) cs).setShouldStopAfterContextSwitch(false);
+        cs.stop();
+      } else if (((UserlandProcess) cs).getShouldStopAfterContextSwitch() == null) {
+        // TODO: This might never happen
+        Output.debugPrint(
+            "OS.contextSwitcher.shouldStopAfterContextSwitch has not been set yet; continuing...");
+      } else {
+        Output.debugPrint(
+            "OS.contextSwitcher.shouldStopAfterContextSwitch is false; continuing...");
+      }
+    } else {
+      Output.debugPrint("OS.contextSwitcher is not a UserlandProcess; continuing...");
+    }
+  }
+
+  public static void switchContext(
+      UnprivilegedContextSwitcher cs,
+      CallType callType,
+      BiConsumer<UnprivilegedContextSwitcher, Object> retSaver,
+      Object... params) {
+    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, cs.toString());
+    Output.debugPrint("Call type: " + callType);
+    synchronized (cs) {
+      // Announce our arrival.
+      Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, cs.toString());
+
+      // Store a reference on OS to the Runnable whose thread is calling this method.
+      setContextSwitcher(cs);
+
+      // Set the call type for this context switch.
+      setCallType(callType);
+
+      // Clear current params; set new ones.
+      setParams(params);
+
+      // Start Kernel; stop contextSwitcher.
+      startKernel(cs);
+
+      // Save the value returned from the Kernel to the context switcher.
+      getRetVal().ifPresent(rv -> cs.setContextSwitchRet(retSaver, rv));
+    }
+    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, cs.toString());
+
+    // The following is the logic that stops the context switcher if needed.
+    // We can't have this in the sync block because then the cs would stop while holding the lock.
+
+    Output.debugPrint(
+        """
+
+
+                        Checking if we should stop the contextSwitcher due to
+                        being a UserlandProcess that is not the new currentlyRunning.
+                        Checking shouldStopAfterContextSwitch set in Scheduler.switchContext.""");
+    if (cs instanceof UserlandProcess) {
+      Output.debugPrint("OS.contextSwitcher is a UserlandProcess");
+      ((UserlandProcess) cs).preSetStopRequested(false);
+      if (((UserlandProcess) cs).getShouldStopAfterContextSwitch()) {
+        Output.debugPrint(
+            """
+
+
+                            OS.contextSwitcher.shouldStopAfterContextSwitch is true;
+                            setting it to false and stopping the contextSwitcher.
+                            This is where a UserlandProcess stops due to timeout.""");
         ((UserlandProcess) cs).setShouldStopAfterContextSwitch(false);
         cs.stop();
       } else if (((UserlandProcess) cs).getShouldStopAfterContextSwitch() == null) {
@@ -198,7 +254,8 @@ public class OS {
    * Data field X is guarded by the semaphore whose parking space is reserved for the thread that
    * wants to reliably "see" an update made to X.
    *
-   * <p>As such, retVal is guarded by the UnprivilegedContextSwitcher's semaphore.
+   * <p>As such, retVal is guarded by the UnprivilegedContextSwitcher's semaphore (and does not need
+   * to be declared synchronized).
    *
    * <p>The UCS's thread is the only thread that needs to "see" updates to retVal. As such, we rely
    * solely on UCS's semaphore for visibility assurance, and leave this method unsynchronized.

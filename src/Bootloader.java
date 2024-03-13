@@ -30,6 +30,11 @@ public class Bootloader implements UnprivilegedContextSwitcher, Runnable {
   }
 
   @Override
+  public List<KernelMessage> getMessages() {
+    return null;
+  }
+
+  @Override
   public boolean isStopped() {
     return UnprivilegedContextSwitcher.super.isStopped();
   }
