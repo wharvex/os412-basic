@@ -1,4 +1,6 @@
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.IntStream;
 
 /** KERNELLAND */
 public class KernelMessage {
@@ -10,7 +12,10 @@ public class KernelMessage {
   public KernelMessage(int targetPid, int messageType, String messageContent) {
     this.targetPid = targetPid;
     this.messageType = messageType;
-    this.messageContent = messageContent.getBytes(StandardCharsets.UTF_8);
+    this.messageContent = new byte[messageContent.length() + 1];
+    IntStream.range(0, messageContent.length())
+        .forEach(i -> this.messageContent[i] = (byte) messageContent.charAt(i));
+    this.messageContent[messageContent.length()] = '\0';
   }
 
   /**
@@ -42,7 +47,7 @@ public class KernelMessage {
     return senderPid;
   }
 
-  public void setSenderPid(int senderPid) {
+  public void setSenderPid(Integer senderPid) {
     this.senderPid = senderPid;
   }
 
@@ -52,6 +57,13 @@ public class KernelMessage {
 
   public byte[] getMessageContent() {
     return messageContent;
+  }
+
+  public String getMessageContentString() {
+    IntStream a = IntStream.range(0, getMessageContent().length).map(i -> getMessageContent()[i]);
+    StringWriter b = new StringWriter();
+    a.forEach(b::write);
+    return b.toString();
   }
 
   @Override

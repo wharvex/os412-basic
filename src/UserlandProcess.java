@@ -87,6 +87,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   }
 
   public void setShouldStopAfterContextSwitch(boolean shouldStopAfterContextSwitch) {
+    Output.debugPrint("Setting shouldStopAfterContextSwitch to " + shouldStopAfterContextSwitch);
     this.shouldStopAfterContextSwitch = shouldStopAfterContextSwitch;
   }
 

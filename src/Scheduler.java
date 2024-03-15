@@ -54,35 +54,64 @@ public class Scheduler {
     }
   }
 
+  private List<KernelMessage> getWaitingMessagesForPCB(PCB pcb) {
+    return getWaitingMessages().stream().filter(km -> km.getTargetPid() == pcb.getPid()).toList();
+  }
+
   public void switchProcess() {
-    PCB oldCurRun = getCurrentlyRunningSafe();
-    wqAdd(oldCurRun);
-    PCB chosenProcess = wqGetRand();
+    Output.debugPrint("Contents of waitingRecipients: " + getWaitingRecipients());
+
+    // Get the message-waiters who have messages now.
+    var doneWaiters =
+        getWaitingRecipients().stream()
+            .filter(pcb -> !getWaitingMessagesForPCB(pcb).isEmpty())
+            .toList();
+    Output.debugPrint("Initial contents of doneWaiters: " + doneWaiters);
+
+    // Remove from waitingRecipients the message-waiters who have messages now.
+    getWaitingRecipients().removeAll(doneWaiters);
+    Output.debugPrint(
+        "Contents of waitingRecipients after removing doneWaiters: " + getWaitingRecipients());
+
+    // Add each doneWaiter's messages to its PCB.
+    doneWaiters =
+        doneWaiters.stream()
+            .map(pcb -> pcb.addAllToMessagesAndReturnThis(getWaitingMessagesForPCB(pcb)))
+            .toList();
+    Output.debugPrint("Contents of donewaiters after adding messages to them:");
+    doneWaiters.forEach(dw -> Output.debugPrint(dw + " -- " + dw.getMessages()));
+
+    // Add all the doneWaiters to the waiting (readyToRun) queue.
+    getWQ().addAll(doneWaiters);
+
+    // Add CR to WQ if CR is not null.
+    // Pro-tip: Set CR to null right before calling switchProcess if you don't want to give it a
+    // chance to run again this context switch. Just be aware that if you have unlucky timing, this
+    // will cause the Timer thread to skip a quantum if it happens to fire while CR is null.
+    preGetCurrentlyRunning().ifPresent(this::addToWQ);
+
+    // Choose the new process to run.
+    PCB chosenProcess = getRandFromWQ();
+
+    // Save the chosen process' messages to OS.
+    OS.setMessages(getWaitingMessagesForPCB(chosenProcess));
+
+    // Get what will become the old currently running.
+    PCB oldCurRun =
+        preGetCurrentlyRunning()
+            .orElse(getFromPcbByPidComplete(getPidByName(OS.getContextSwitcher().getThreadName())));
+    Output.debugPrint("oldCurRun threadName: " + oldCurRun.getThreadName());
+
+    // Mark oldCurRun for stopping based on whether chosenProcess ref-equals oldCurRun.
     Output.debugPrint(
         """
 
 
                     If the chosen process doesn't equal the old curRun,
-                    the current switch-process operation should result in
-                    the old curRun stopping and being added to the wq""");
-    if (chosenProcess != oldCurRun) {
-      Output.debugPrint(
-          """
+                    the old curRun should stop after the context switch""");
+    oldCurRun.getUserlandProcess().setShouldStopAfterContextSwitch(chosenProcess != oldCurRun);
 
-
-                      The chosen process doesn't equal the old curRun;
-                      setting shouldStopAfterContextSwitch to true on old curRun
-                      and adding it to the wq""");
-      oldCurRun.getUserlandProcess().setShouldStopAfterContextSwitch(true);
-    } else {
-      Output.debugPrint(
-          """
-
-
-                      The chosen process does equal the old curRun; not adding or stopping.
-                      setting old CR's UP's shouldStopAfterContextSwitch to false""");
-      oldCurRun.getUserlandProcess().setShouldStopAfterContextSwitch(false);
-    }
+    // Set currentlyRunning to the chosen process.
     preSetCurrentlyRunning(chosenProcess);
   }
 
@@ -115,34 +144,35 @@ public class Scheduler {
     Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, this.toString());
   }
 
-  public void wqAdd(PCB pcb) {
-    wqGet().add(pcb);
+  public void addToWQ(PCB pcb) {
+    getWQ().add(pcb);
     Output.debugPrint("Added " + pcb.getThreadName() + " to wq");
     Output.debugPrint("Contents of wq:");
-    wqGet().forEach(wqElm -> Output.debugPrint(wqElm.getThreadName()));
+    getWQ().forEach(wqElm -> Output.debugPrint(wqElm.getThreadName()));
+    Output.debugPrint("Size of wq: " + getWQ().size());
   }
 
-  private void wqRemove(int idx) {
-    PCB removed = wqGet().remove(idx);
+  private void removeFromWQ(int idx) {
+    PCB removed = getWQ().remove(idx);
     Output.debugPrint("Removed " + removed.getThreadName() + " from wq");
     Output.debugPrint("Contents of wq:");
-    wqGet().forEach(wqElm -> Output.debugPrint(wqElm.getThreadName()));
+    getWQ().forEach(wqElm -> Output.debugPrint(wqElm.getThreadName()));
   }
 
-  private List<PCB> wqGet() {
+  private List<PCB> getWQ() {
     return wqBackground;
   }
 
-  private PCB wqGetFrom(int idx) {
-    return wqGet().get(idx);
+  private PCB getFromWQ(int idx) {
+    return getWQ().get(idx);
   }
 
-  public PCB wqGetRand() {
+  public PCB getRandFromWQ() {
     Random r = new Random();
-    int chosenIdx = r.nextInt(wqGet().size());
-    PCB chosenProcess = wqGetFrom(chosenIdx);
+    int chosenIdx = r.nextInt(getWQ().size());
+    PCB chosenProcess = getFromWQ(chosenIdx);
     Output.debugPrint("The chosen process to switch to is " + chosenProcess.getThreadName());
-    wqRemove(chosenIdx);
+    removeFromWQ(chosenIdx);
     return chosenProcess;
   }
 
@@ -178,6 +208,7 @@ public class Scheduler {
                     // Timer from its waiting loop.
                     PCB::stop,
                     () -> {
+                      Output.debugPrint("Timer found null CR");
                       Output.debugPrint(
                           "Bootloader is " + ThreadHelper.getThreadStateString("bootloaderThread"));
                       Output.debugPrint(
@@ -221,12 +252,15 @@ public class Scheduler {
   }
 
   public void addToWaitingMessages(KernelMessage km) {
+    Output.debugPrint("Adding " + km + " to waitingMessages");
     getWaitingMessages().add(km);
     Output.debugPrint("waitingMessages contents: " + getWaitingMessages());
   }
 
   public void addToWaitingRecipients(PCB pcb) {
+    Output.debugPrint("Adding " + pcb.getThreadName() + " to waitingRecipients");
     getWaitingRecipients().add(pcb);
+    Output.debugPrint("Contents of waitingRecipients: " + getWaitingRecipients());
   }
 
   public PCB getFromWaitingRecipients(int idx) {

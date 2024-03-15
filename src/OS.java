@@ -12,6 +12,7 @@ public class OS {
   private static UnprivilegedContextSwitcher contextSwitcher;
   private static Object retVal;
   private static CallType callType;
+  private static List<KernelMessage> messages = new ArrayList<>();
 
   /**
    * Only called by Bootloader thread.
@@ -94,7 +95,7 @@ public class OS {
       startKernel(cs);
 
       // Save the value returned from the Kernel to the context switcher.
-      getRetVal().ifPresent(cs::addToCsRets);
+      getRetVal().ifPresent(cs::setContextSwitchRet);
     }
     Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, cs.toString());
 
@@ -346,6 +347,21 @@ public class OS {
 
   public static void switchProcess(UnprivilegedContextSwitcher ucs) {
     switchContext(ucs, CallType.SWITCH_PROCESS);
+  }
+
+  public static List<KernelMessage> getMessages() {
+    return messages;
+  }
+
+  public static void setMessages(List<KernelMessage> messages) {
+    Output.debugPrint("Setting OS messages to " + messages);
+    OS.messages = messages;
+  }
+
+  public static List<KernelMessage> getMessagesAndClear() {
+    var ret = getMessages();
+    setMessages(new ArrayList<>());
+    return ret;
   }
 
   public enum CallType {

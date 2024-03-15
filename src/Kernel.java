@@ -17,6 +17,8 @@ public class Kernel implements Stoppable, Runnable, Device {
     intArr = IntStream.generate(() -> -1).limit(10).toArray();
   }
 
+  // ------------------------------------- STOPPABLE OVERRIDES -------------------------------------
+
   @Override
   public Semaphore getSemaphore() {
     return semaphore;
@@ -27,12 +29,24 @@ public class Kernel implements Stoppable, Runnable, Device {
     return thread;
   }
 
+  // --------------------------------------- HELPER METHODS ---------------------------------------
+
+  public PCB getCurrentlyRunningSafe() {
+    return getScheduler().getCurrentlyRunningSafe();
+  }
+
+  public Scheduler getScheduler() {
+    return scheduler;
+  }
+
   private PCB createPCB(UserlandProcess up, Scheduler.PriorityType pt) {
     PCB pcb = new PCB(up, pt);
     Output.debugPrint(up.getThreadName() + " has now been created");
     getScheduler().addToPcbByPidComplete(pcb, pcb.getPid());
     return pcb;
   }
+
+  // -------------------------------------- CALLTYPE METHODS --------------------------------------
 
   private void startupCreateProcess() {
     UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
@@ -49,18 +63,55 @@ public class Kernel implements Stoppable, Runnable, Device {
     Scheduler.PriorityType pt = (Scheduler.PriorityType) OS.getParam(1);
     PCB pcb = createPCB(up, pt);
     pcb.init();
-    getScheduler().wqAdd(pcb);
+    getScheduler().addToWQ(pcb);
     OS.setRetValOnOS(pcb.getPid());
     getScheduler().switchProcess();
   }
 
-  public PCB getCurrentlyRunningSafe() {
-    return getScheduler().getCurrentlyRunningSafe();
+  private void switchProcess() {
+    OS.setRetValOnOS(null);
+    getScheduler().switchProcess();
   }
 
-  public Scheduler getScheduler() {
-    return scheduler;
+  private void sendMessage() {
+    // Get the message from Userland.
+    KernelMessage userlandKM = (KernelMessage) OS.getParam(0);
+
+    // Set sender pid on the message.
+    userlandKM.setSenderPid(getScheduler().getPidByName(getCurrentlyRunningSafe().getThreadName()));
+
+    // Add message to Scheduler's waiting messages queue.
+    getScheduler().addToWaitingMessages(new KernelMessage(userlandKM));
+
+    // Set context switch ret val.
+    OS.setRetValOnOS(null);
+
+    // Give another process a chance to run.
+    getScheduler().switchProcess();
   }
+
+  private void waitForMessage() {
+    // Get message waiter PCB.
+    var pcb =
+        getScheduler()
+            .getFromPcbByPidComplete(
+                getScheduler().getPidByName(getCurrentlyRunningSafe().getThreadName()));
+    Output.debugPrint("Message waiter thread: " + pcb.getThreadName());
+
+    // Add message waiter PCB to the waitingRecipients queue.
+    getScheduler().addToWaitingRecipients(pcb);
+
+    // Set currentlyRunning to null so switchProcess does not add it to the WQ.
+    getScheduler().preSetCurrentlyRunning(null);
+
+    // Set context switch ret val.
+    OS.setRetValOnOS(null);
+
+    // Give another process a chance to run.
+    getScheduler().switchProcess();
+  }
+
+  // ------------------------------------- FILESYSTEM METHODS -------------------------------------
 
   public VFS getVfs() {
     return vfs;
@@ -105,6 +156,8 @@ public class Kernel implements Stoppable, Runnable, Device {
     return 0;
   }
 
+  // ----------------------------------------- RUN METHOD -----------------------------------------
+
   @Override
   public void run() {
     Output.debugPrint("Initting");
@@ -120,26 +173,9 @@ public class Kernel implements Stoppable, Runnable, Device {
       switch (ct) {
         case STARTUP_CREATE_PROCESS -> startupCreateProcess();
         case CREATE_PROCESS -> createProcess();
-        case SWITCH_PROCESS -> {
-          OS.setRetValOnOS(null);
-          getScheduler().switchProcess();
-        }
-        case SEND_MESSAGE -> {
-          // Get the message from Userland.
-          KernelMessage userlandKM = (KernelMessage) OS.getParam(0);
-
-          // Set sender pid on the message.
-          userlandKM.setSenderPid(getScheduler().getPidByName(ucs.getThreadName()));
-
-          // Add message to Scheduler's waiting messages queue.
-          getScheduler().addToWaitingMessages(new KernelMessage(userlandKM));
-
-          // Set context switch ret val.
-          OS.setRetValOnOS(null);
-
-          // Give another process a chance to run.
-          getScheduler().switchProcess();
-        }
+        case SWITCH_PROCESS -> switchProcess();
+        case SEND_MESSAGE -> sendMessage();
+        case WAIT_FOR_MESSAGE -> waitForMessage();
       }
 
       // Start the new currentlyRunning.

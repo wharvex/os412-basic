@@ -14,10 +14,12 @@ public class PCB {
   private final UserlandProcess userlandProcess;
   private final int pid;
   private final List<KernelMessage> messages;
-  // The Instant before which we should not wake up this PCB if it is sleeping.
   private Scheduler.PriorityType priorityType;
-  // How many times the Timer has stopped this PCB.
+
+  // The Instant before which we should not wake up this PCB if it is sleeping.
   private Instant wakeupAfter;
+
+  // How many times the Timer has stopped this PCB.
   private int timeoutsCounter;
 
   public PCB(UserlandProcess up, Scheduler.PriorityType pt) {
@@ -37,6 +39,11 @@ public class PCB {
 
   public void setTimeoutsCounter(int timeoutsCounter) {
     this.timeoutsCounter = timeoutsCounter;
+  }
+
+  public PCB addAllToMessagesAndReturnThis(List<KernelMessage> kms) {
+    getMessages().addAll(kms);
+    return this;
   }
 
   public String getThreadName() {
@@ -124,5 +131,9 @@ public class PCB {
 
   public void resetTimeoutsCounter() {
     setTimeoutsCounter(0);
+  }
+
+  public List<KernelMessage> getMessages() {
+    return messages;
   }
 }
