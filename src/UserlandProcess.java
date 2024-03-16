@@ -101,6 +101,10 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     return messages;
   }
 
+  public void addAllToMessages(List<KernelMessage> kms) {
+    getMessages().addAll(kms);
+  }
+
   public void waitUntilStoppedByRequest() {
     while (preIsStopRequested()) {
       Output.debugPrint("Waiting for " + getThreadName() + " to stop from request");

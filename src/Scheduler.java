@@ -84,6 +84,13 @@ public class Scheduler {
     // Add all the doneWaiters to the waiting (readyToRun) queue.
     getWQ().addAll(doneWaiters);
 
+    // Remove from waitingMessages all the messages that were waiting for the now doneWaiters.
+    doneWaiters.forEach(dw -> getWaitingMessages().removeAll(getWaitingMessagesForPCB(dw)));
+    Output.debugPrint(
+        "Contents of waitingMessages after removing"
+            + " the messages that were waiting for the doneWaiters: "
+            + getWaitingMessages());
+
     // Add CR to WQ if CR is not null.
     // Pro-tip: Set CR to null right before calling switchProcess if you don't want to give it a
     // chance to run again this context switch. Just be aware that if you have unlucky timing, this
@@ -94,7 +101,10 @@ public class Scheduler {
     PCB chosenProcess = getRandFromWQ();
 
     // Save the chosen process' messages to OS.
-    OS.setMessages(getWaitingMessagesForPCB(chosenProcess));
+    OS.setMessages(chosenProcess.getMessages());
+
+    // Reset the PCB's messages.
+    chosenProcess.setMessages(new ArrayList<>());
 
     // Get what will become the old currently running.
     PCB oldCurRun =

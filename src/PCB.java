@@ -13,7 +13,8 @@ public class PCB {
   private static int nextPid = 0;
   private final UserlandProcess userlandProcess;
   private final int pid;
-  private final List<KernelMessage> messages;
+
+  private List<KernelMessage> messages;
   private Scheduler.PriorityType priorityType;
 
   // The Instant before which we should not wake up this PCB if it is sleeping.
@@ -135,5 +136,9 @@ public class PCB {
 
   public List<KernelMessage> getMessages() {
     return messages;
+  }
+
+  public void setMessages(List<KernelMessage> messages) {
+    this.messages = messages;
   }
 }

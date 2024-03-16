@@ -353,6 +353,12 @@ public class OS {
     return messages;
   }
 
+  /**
+   * This is only set for a process when that process is chosen to run next, so there shouldn't be a
+   * danger of the wrong process getting them.
+   *
+   * @param messages
+   */
   public static void setMessages(List<KernelMessage> messages) {
     Output.debugPrint("Setting OS messages to " + messages);
     OS.messages = messages;

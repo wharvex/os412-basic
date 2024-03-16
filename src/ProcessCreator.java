@@ -37,9 +37,15 @@ public class ProcessCreator extends UserlandProcess {
             Scheduler.PriorityType.INTERACTIVE,
             (ucs, pid) -> ((ProcessCreator) ucs).addToPongPids((int) pid));
       } else if (i == 3) {
-        // Send a message.
-        Output.print("ProcessCreator sending message to ping with content: baba/booie");
-        OS.sendMessage(this, new KernelMessage(getPingPids().get(0), 2, "baba/booie"));
+        // Send Pong's pid to Ping.
+        Output.print("ProcessCreator sending message to ping with content: Pong's pid");
+        OS.sendMessage(
+            this, new KernelMessage(getPingPids().get(0), 1, getPongPids().get(0).toString()));
+      } else if (i == 4) {
+        // Send Ping's pid to Pong.
+        Output.print("ProcessCreator sending message to pong with content: Ping's pid");
+        OS.sendMessage(
+            this, new KernelMessage(getPongPids().get(0), 1, getPingPids().get(0).toString()));
       } else {
         // Done.
         Output.print("ProcessCreator done creating processes for now...");

@@ -12,10 +12,9 @@ public class KernelMessage {
   public KernelMessage(int targetPid, int messageType, String messageContent) {
     this.targetPid = targetPid;
     this.messageType = messageType;
-    this.messageContent = new byte[messageContent.length() + 1];
+    this.messageContent = new byte[messageContent.length()];
     IntStream.range(0, messageContent.length())
         .forEach(i -> this.messageContent[i] = (byte) messageContent.charAt(i));
-    this.messageContent[messageContent.length()] = '\0';
   }
 
   /**
