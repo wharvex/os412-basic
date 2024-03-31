@@ -1,9 +1,12 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.concurrent.Semaphore;
 
 /** USERLAND */
 public abstract class UserlandProcess implements Runnable, UnprivilegedContextSwitcher {
+  private static final int[][] TLB = new int[OS.getTlbSize()][OS.getTlbSize()];
+  private static final byte[] PHYSICAL_MEMORY = new byte[OS.getPageSize() * OS.getPageSize()];
   private final String debugPid;
   private final Semaphore semaphore;
   private final Thread thread;
@@ -19,6 +22,10 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     csRets = new ArrayList<>();
     messages = new ArrayList<>();
     shouldStopFromTimeout = false;
+  }
+
+  private static int[][] getTlb() {
+    return TLB;
   }
 
   /** Only called by Timer thread via PCB. */
@@ -110,5 +117,43 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
       Output.debugPrint("Waiting for " + getThreadName() + " to stop from request");
       ThreadHelper.threadSleep(10);
     }
+  }
+
+  public byte read(int address) {
+    int virtualPageNumber = address / OS.getPageSize();
+    int pageOffset = address % OS.getPageSize();
+    return 0;
+  }
+
+  public void write(int address, byte value) {}
+
+  private int getZerothVirtFromTlb() {
+    return getTlb()[0][0];
+  }
+
+  private int getFirstVirtFromTlb() {
+    return getTlb()[0][1];
+  }
+
+  private int getZerothPhysFromTlb() {
+    return getTlb()[1][0];
+  }
+
+  private int getFirstPhysFromTlb() {
+    return getTlb()[1][1];
+  }
+
+  private OptionalInt matchAndReturnPhys(int virtualPageNumber) {
+    if (getZerothVirtFromTlb() == virtualPageNumber) {
+      return OptionalInt.of(getZerothPhysFromTlb());
+    } else if (getFirstVirtFromTlb() == virtualPageNumber) {
+      return OptionalInt.of(getFirstPhysFromTlb());
+    } else {
+      return OptionalInt.empty();
+    }
+  }
+
+  private int translateVirtualPageNumberToPhysical(int virtualPageNumber) {
+    return matchAndReturnPhys(virtualPageNumber).orElseThrow();
   }
 }

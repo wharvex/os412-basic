@@ -7,12 +7,27 @@ import java.util.function.BiConsumer;
  * <p>Models the gateway between userland and kernelland.
  */
 public class OS {
-  private static final List<Object> params = new ArrayList<>();
+  private static final int PAGE_SIZE = 1024;
+  private static final int MEMORY_MAP_SIZE = 100;
+  private static final List<Object> PARAMS = new ArrayList<>();
+  private static final int TLB_SIZE = 2;
   private static Kernel kernel;
   private static UnprivilegedContextSwitcher contextSwitcher;
   private static Object retVal;
   private static CallType callType;
   private static List<KernelMessage> messages = new ArrayList<>();
+
+  public static int getPageSize() {
+    return PAGE_SIZE;
+  }
+
+  public static int getMemoryMapSize() {
+    return MEMORY_MAP_SIZE;
+  }
+
+  public static int getTlbSize() {
+    return TLB_SIZE;
+  }
 
   /**
    * Only called by Bootloader thread.
@@ -201,7 +216,7 @@ public class OS {
 
   private static void setParams(Object... newParams) {
     // The params list will be empty (size = 0) after this call returns.
-    params.clear();
+    PARAMS.clear();
 
     // Throw an exception if any of the new params are null and log the exception.
     try {
@@ -215,7 +230,7 @@ public class OS {
     }
 
     // Add new params to params.
-    params.addAll(List.of(newParams));
+    PARAMS.addAll(List.of(newParams));
   }
 
   /**
@@ -227,7 +242,7 @@ public class OS {
   public static Object getParam(int idx) {
     // Throw an exception if the param index is out of range and log the exception.
     try {
-      if (idx < 0 || idx >= params.size()) {
+      if (idx < 0 || idx >= PARAMS.size()) {
         throw new RuntimeException(Output.getErrorString("Param index " + idx + " out of range."));
       }
     } catch (RuntimeException e) {
@@ -236,7 +251,7 @@ public class OS {
     }
 
     // Get the param.
-    Object param = params.get(idx);
+    Object param = PARAMS.get(idx);
 
     // Throw an exception if the param is null and log the exception.
     try {
