@@ -13,14 +13,13 @@ public class PCB {
   private static int nextPid = 0;
   private final UserlandProcess userlandProcess;
   private final int pid;
-  private final int[] memoryMap = new int[100];
+  private final int[] memoryMap = new int[OS.getMemoryMapSize()];
   private List<KernelMessage> messages;
   private Scheduler.PriorityType priorityType;
   // The Instant before which we should not wake up this PCB if it is sleeping.
   private Instant wakeupAfter;
   // How many times the Timer has stopped this PCB.
   private int timeoutsCounter;
-
   public PCB(UserlandProcess up, Scheduler.PriorityType pt) {
     userlandProcess = up;
     priorityType = pt;
@@ -30,6 +29,10 @@ public class PCB {
 
     timeoutsCounter = 0;
     messages = new ArrayList<>();
+  }
+
+  public int[] getMemoryMap() {
+    return memoryMap;
   }
 
   public int getTimeoutsCounter() {
