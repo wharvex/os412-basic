@@ -95,6 +95,8 @@ public class ProcessCreator extends UserlandProcess {
       default:
         // Done.
         Output.print("ProcessCreator done testing memory.");
+        Output.print("ProcessCreator says: MemoryTestA pid: " + getMemTestAPids().getFirst());
+        Output.print("ProcessCreator says: MemoryTestB pid: " + getMemTestBPids().getFirst());
         debugPrintOtherThreads();
     }
   }

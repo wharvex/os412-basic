@@ -119,6 +119,14 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     }
   }
 
+  private int getFromTlb(int vOrP, int zOrF) {
+    return getTlb()[vOrP][zOrF];
+  }
+
+  private void setOnTlb(int vOrP, int zOrF, int val) {
+    getTlb()[vOrP][zOrF] = val;
+  }
+
   public byte read(int address) {
     int virtualPageNumber = address / OS.getPageSize();
     int pageOffset = address % OS.getPageSize();
@@ -127,33 +135,45 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
 
   public void write(int address, byte value) {}
 
-  private int getZerothVirtFromTlb() {
-    return getTlb()[0][0];
+  private int getVirtZerothFromTlb() {
+    return getFromTlb(0, 0);
   }
 
-  private int getFirstVirtFromTlb() {
-    return getTlb()[0][1];
+  private void setVirtZerothOnTlb(int vz) {
+    setOnTlb(0, 0, vz);
   }
 
-  private int getZerothPhysFromTlb() {
-    return getTlb()[1][0];
+  private int getVirtFirstFromTlb() {
+    return getFromTlb(0, 1);
   }
 
-  private int getFirstPhysFromTlb() {
-    return getTlb()[1][1];
+  private void setVirtFirstOnTlb(int vf) {
+    setOnTlb(0, 1, vf);
+  }
+
+  private int getPhysZerothFromTlb() {
+    return getFromTlb(1, 0);
+  }
+
+  private void setPhysZerothOnTlb(int pz) {
+    setOnTlb(1, 0, pz);
+  }
+
+  private int getPhysFirstFromTlb() {
+    return getFromTlb(1, 1);
+  }
+
+  private void setPhysFirstOnTlb(int pf) {
+    setOnTlb(1, 1, pf);
   }
 
   private OptionalInt matchAndReturnPhys(int virtualPageNumber) {
-    if (getZerothVirtFromTlb() == virtualPageNumber) {
-      return OptionalInt.of(getZerothPhysFromTlb());
-    } else if (getFirstVirtFromTlb() == virtualPageNumber) {
-      return OptionalInt.of(getFirstPhysFromTlb());
+    if (getVirtZerothFromTlb() == virtualPageNumber) {
+      return OptionalInt.of(getPhysZerothFromTlb());
+    } else if (getVirtFirstFromTlb() == virtualPageNumber) {
+      return OptionalInt.of(getPhysFirstFromTlb());
     } else {
       return OptionalInt.empty();
     }
-  }
-
-  private int translateVirtualPageNumberToPhysical(int virtualPageNumber) {
-    return matchAndReturnPhys(virtualPageNumber).orElseThrow();
   }
 }
