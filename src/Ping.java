@@ -18,14 +18,14 @@ public class Ping extends UserlandProcess {
   void main() {
     int i = 0;
     while (true) {
-      Output.print("Hello from Ping " + getDebugPid() + " (times printed: " + (++i) + ")");
-      Output.print("Ping waiting for message " + (getMessages().size() + 1));
+      OutputHelper.print("Hello from Ping " + getDebugPid() + " (times printed: " + (++i) + ")");
+      OutputHelper.print("Ping waiting for message " + (getMessages().size() + 1));
       OS.waitForMessage(this);
       addAllToMessages(OS.getMessagesAndClear());
       IntStream.range(0, getMessages().size())
           .forEach(
               j ->
-                  Output.print(
+                  OutputHelper.print(
                       "Ping's received message "
                           + (j + 1)
                           + " has content -- "
@@ -34,9 +34,9 @@ public class Ping extends UserlandProcess {
       getPongPid()
           .ifPresent(
               p -> {
-                Output.print("Ping sees pong's pid as: " + p);
+                OutputHelper.print("Ping sees pong's pid as: " + p);
                 String messageContent = "baba booey " + finalI + " from ping";
-                Output.print("Ping sending message to pong with content: " + messageContent);
+                OutputHelper.print("Ping sending message to pong with content: " + messageContent);
                 OS.sendMessage(this, new KernelMessage(p, 2, messageContent));
               });
       ThreadHelper.threadSleep(1000);

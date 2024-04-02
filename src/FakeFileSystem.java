@@ -8,11 +8,11 @@ public class FakeFileSystem implements Device {
     try {
       if (filename.isEmpty() || filename.isBlank() || filename == null) {
         throw new RuntimeException(
-            Output.getErrorString(
+            OutputHelper.getErrorString(
                 "FakeFileSystem constructor expected non-null, non-blank, non-empty filename string."));
       }
     } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
     this.filename = filename;

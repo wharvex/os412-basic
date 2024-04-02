@@ -4,7 +4,7 @@ import java.util.concurrent.Semaphore;
 public interface Stoppable {
 
   default void init() {
-    Output.debugPrint("Initting " + getThreadName());
+    OutputHelper.debugPrint("Initting " + getThreadName());
     getThread().start();
   }
 
@@ -20,20 +20,20 @@ public interface Stoppable {
     try {
       if (Thread.currentThread() != getThread()) {
         throw new RuntimeException(
-            Output.getErrorString("Parking space reserved for " + getThreadName()));
+            OutputHelper.getErrorString("Parking space reserved for " + getThreadName()));
       }
     } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
-    Output.debugPrint("Stopping");
+    OutputHelper.debugPrint("Stopping");
     try {
       getSemaphore().acquire();
     } catch (InterruptedException e) {
-      Output.errorPrint(getThreadName() + " interrupted while parked at its semaphore");
+      OutputHelper.errorPrint(getThreadName() + " interrupted while parked at its semaphore");
       Thread.currentThread().interrupt();
     }
-    Output.debugPrint("Starting");
+    OutputHelper.debugPrint("Starting");
   }
 
   Semaphore getSemaphore();
@@ -46,7 +46,7 @@ public interface Stoppable {
 
   default void waitUntilStopped() {
     while (!isStopped()) {
-      Output.debugPrint("Waiting for " + getThreadName() + " to stop");
+      OutputHelper.debugPrint("Waiting for " + getThreadName() + " to stop");
       ThreadHelper.threadSleep(10);
     }
   }
@@ -57,10 +57,10 @@ public interface Stoppable {
 
     // Ensure semaphore remains binary.
     if (getSemaphore().availablePermits() < 1) {
-      Output.debugPrint("Starting " + getThreadName());
+      OutputHelper.debugPrint("Starting " + getThreadName());
       getSemaphore().release();
     } else {
-      Output.debugPrint(
+      OutputHelper.debugPrint(
           "Did not release "
               + getThreadName()
               + "'s semaphore because its available permits are not less than 1");

@@ -23,7 +23,7 @@ public interface UnprivilegedContextSwitcher extends Stoppable {
 
   default void addToCsRets(Object ret) {
     getCsRets().add(ret);
-    Output.debugPrint("Saved " + ret + " to rets of " + getThreadName());
+    OutputHelper.debugPrint("Saved " + ret + " to rets of " + getThreadName());
   }
 
   /**

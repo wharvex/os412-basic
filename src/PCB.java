@@ -20,6 +20,7 @@ public class PCB {
   private Instant wakeupAfter;
   // How many times the Timer has stopped this PCB.
   private int timeoutsCounter;
+
   public PCB(UserlandProcess up, Scheduler.PriorityType pt) {
     userlandProcess = up;
     priorityType = pt;
@@ -86,7 +87,7 @@ public class PCB {
   public void stop() {
     getUserlandProcess().requestStop();
     getUserlandProcess().waitUntilStoppedByRequest();
-    Output.debugPrint("Successfully stopped " + getThreadName());
+    OutputHelper.debugPrint("Successfully stopped " + getThreadName());
     incrementTimeoutsCounter();
   }
 

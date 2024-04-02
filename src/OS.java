@@ -91,11 +91,11 @@ public class OS {
    */
   public static void switchContext(
       UnprivilegedContextSwitcher cs, CallType callType, Object... params) {
-    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, cs.toString());
-    Output.debugPrint("Call type: " + callType);
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, cs.toString());
+    OutputHelper.debugPrint("Call type: " + callType);
     synchronized (cs) {
       // Announce our arrival.
-      Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, cs.toString());
+      OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_ENTER, cs.toString());
 
       // Store a reference on OS to the Runnable whose thread is calling this method.
       setContextSwitcher(cs);
@@ -112,12 +112,12 @@ public class OS {
       // Save the value returned from the Kernel to the context switcher.
       getRetVal().ifPresent(cs::setContextSwitchRet);
     }
-    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, cs.toString());
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_LEAVE, cs.toString());
 
     // The following is the logic that stops the context switcher if needed.
     // We can't have this in the sync block because then the cs would stop while holding the lock.
 
-    Output.debugPrint(
+    OutputHelper.debugPrint(
         """
 
 
@@ -125,10 +125,10 @@ public class OS {
                     being a UserlandProcess that is not the new currentlyRunning.
                     Checking shouldStopAfterContextSwitch set in Scheduler.switchContext.""");
     if (cs instanceof UserlandProcess) {
-      Output.debugPrint("OS.contextSwitcher is a UserlandProcess");
+      OutputHelper.debugPrint("OS.contextSwitcher is a UserlandProcess");
       ((UserlandProcess) cs).preSetStopRequested(false);
       if (((UserlandProcess) cs).getShouldStopAfterContextSwitch()) {
-        Output.debugPrint(
+        OutputHelper.debugPrint(
             """
 
 
@@ -139,14 +139,14 @@ public class OS {
         cs.stop();
       } else if (((UserlandProcess) cs).getShouldStopAfterContextSwitch() == null) {
         // TODO: This might never happen
-        Output.debugPrint(
+        OutputHelper.debugPrint(
             "OS.contextSwitcher.shouldStopAfterContextSwitch has not been set yet; continuing...");
       } else {
-        Output.debugPrint(
+        OutputHelper.debugPrint(
             "OS.contextSwitcher.shouldStopAfterContextSwitch is false; continuing...");
       }
     } else {
-      Output.debugPrint("OS.contextSwitcher is not a UserlandProcess; continuing...");
+      OutputHelper.debugPrint("OS.contextSwitcher is not a UserlandProcess; continuing...");
     }
   }
 
@@ -155,11 +155,11 @@ public class OS {
       CallType callType,
       BiConsumer<UnprivilegedContextSwitcher, Object> retSaver,
       Object... params) {
-    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, cs.toString());
-    Output.debugPrint("Call type: " + callType);
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, cs.toString());
+    OutputHelper.debugPrint("Call type: " + callType);
     synchronized (cs) {
       // Announce our arrival.
-      Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, cs.toString());
+      OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_ENTER, cs.toString());
 
       // Store a reference on OS to the Runnable whose thread is calling this method.
       setContextSwitcher(cs);
@@ -176,12 +176,12 @@ public class OS {
       // Save the value returned from the Kernel to the context switcher.
       getRetVal().ifPresent(rv -> cs.setContextSwitchRet(retSaver, rv));
     }
-    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, cs.toString());
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_LEAVE, cs.toString());
 
     // The following is the logic that stops the context switcher if needed.
     // We can't have this in the sync block because then the cs would stop while holding the lock.
 
-    Output.debugPrint(
+    OutputHelper.debugPrint(
         """
 
 
@@ -189,10 +189,10 @@ public class OS {
                         being a UserlandProcess that is not the new currentlyRunning.
                         Checking shouldStopAfterContextSwitch set in Scheduler.switchContext.""");
     if (cs instanceof UserlandProcess) {
-      Output.debugPrint("OS.contextSwitcher is a UserlandProcess");
+      OutputHelper.debugPrint("OS.contextSwitcher is a UserlandProcess");
       ((UserlandProcess) cs).preSetStopRequested(false);
       if (((UserlandProcess) cs).getShouldStopAfterContextSwitch()) {
-        Output.debugPrint(
+        OutputHelper.debugPrint(
             """
 
 
@@ -203,14 +203,14 @@ public class OS {
         cs.stop();
       } else if (((UserlandProcess) cs).getShouldStopAfterContextSwitch() == null) {
         // TODO: This might never happen
-        Output.debugPrint(
+        OutputHelper.debugPrint(
             "OS.contextSwitcher.shouldStopAfterContextSwitch has not been set yet; continuing...");
       } else {
-        Output.debugPrint(
+        OutputHelper.debugPrint(
             "OS.contextSwitcher.shouldStopAfterContextSwitch is false; continuing...");
       }
     } else {
-      Output.debugPrint("OS.contextSwitcher is not a UserlandProcess; continuing...");
+      OutputHelper.debugPrint("OS.contextSwitcher is not a UserlandProcess; continuing...");
     }
   }
 
@@ -222,10 +222,10 @@ public class OS {
     try {
       if (Arrays.stream(newParams).anyMatch(Objects::isNull)) {
         throw new RuntimeException(
-            Output.getErrorString("Cannot add any null elements to params."));
+            OutputHelper.getErrorString("Cannot add any null elements to params."));
       }
     } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
 
@@ -243,10 +243,11 @@ public class OS {
     // Throw an exception if the param index is out of range and log the exception.
     try {
       if (idx < 0 || idx >= PARAMS.size()) {
-        throw new RuntimeException(Output.getErrorString("Param index " + idx + " out of range."));
+        throw new RuntimeException(
+            OutputHelper.getErrorString("Param index " + idx + " out of range."));
       }
     } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
 
@@ -256,9 +257,10 @@ public class OS {
     // Throw an exception if the param is null and log the exception.
     try {
       Objects.requireNonNull(
-          param, Output.getErrorString("Tried to get param at index " + idx + " but it was null."));
+          param,
+          OutputHelper.getErrorString("Tried to get param at index " + idx + " but it was null."));
     } catch (NullPointerException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
 
@@ -301,7 +303,7 @@ public class OS {
    * @param rv The kernelland function return value.
    */
   public static void setRetValOnOS(Object rv) {
-    Output.debugPrint("Setting OS.retVal to " + rv);
+    OutputHelper.debugPrint("Setting OS.retVal to " + rv);
     retVal = rv;
   }
 
@@ -309,32 +311,33 @@ public class OS {
     try {
       Objects.requireNonNull(
           contextSwitcher,
-          Output.getErrorString("Tried to get OS.contextSwitcher but it was null"));
+          OutputHelper.getErrorString("Tried to get OS.contextSwitcher but it was null"));
     } catch (NullPointerException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
-    Output.debugPrint("OS.contextSwitcher is " + contextSwitcher.getThreadName());
+    OutputHelper.debugPrint("OS.contextSwitcher is " + contextSwitcher.getThreadName());
     return contextSwitcher;
   }
 
   public static void setContextSwitcher(UnprivilegedContextSwitcher cs) {
     try {
-      Objects.requireNonNull(cs, Output.getErrorString("Cannot set OS.contextSwitcher to null"));
+      Objects.requireNonNull(
+          cs, OutputHelper.getErrorString("Cannot set OS.contextSwitcher to null"));
     } catch (NullPointerException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
-    Output.debugPrint("Setting OS.contextSwitcher to " + cs.getThreadName());
+    OutputHelper.debugPrint("Setting OS.contextSwitcher to " + cs.getThreadName());
     contextSwitcher = cs;
   }
 
   public static CallType getCallType() {
     try {
       Objects.requireNonNull(
-          callType, Output.getErrorString("Tried to get OS.callType but it was null"));
+          callType, OutputHelper.getErrorString("Tried to get OS.callType but it was null"));
     } catch (NullPointerException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
     return callType;
@@ -352,9 +355,9 @@ public class OS {
    */
   public static void setCallType(CallType ct) {
     try {
-      Objects.requireNonNull(ct, Output.getErrorString("Cannot set OS.callType to null."));
+      Objects.requireNonNull(ct, OutputHelper.getErrorString("Cannot set OS.callType to null."));
     } catch (NullPointerException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
     callType = ct;
@@ -375,7 +378,7 @@ public class OS {
    * @param messages
    */
   public static void setMessages(List<KernelMessage> messages) {
-    Output.debugPrint("Setting OS messages to " + messages);
+    OutputHelper.debugPrint("Setting OS messages to " + messages);
     OS.messages = messages;
   }
 

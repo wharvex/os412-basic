@@ -9,7 +9,11 @@ public class MemoryTestB extends UserlandProcess {
   void main() {
     int i = 0;
     while (true) {
-      Output.print("Hello from MemoryTestB " + getDebugPid() + " (times printed: " + (++i) + ")");
+      OutputHelper.print(
+          "Hello from MemoryTestB " + getDebugPid() + " (times printed: " + (++i) + ")");
+      int readAddress = RandomHelper.getAddress();
+      OutputHelper.print("MemoryTestB reading from address " + readAddress);
+      read(readAddress);
       ThreadHelper.threadSleep(1000);
       cooperate();
     }

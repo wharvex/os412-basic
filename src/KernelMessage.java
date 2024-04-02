@@ -37,10 +37,10 @@ public class KernelMessage {
     try {
       if (senderPid == null) {
         throw new RuntimeException(
-            Output.getErrorString("Tried to get senderPid but it was null."));
+            OutputHelper.getErrorString("Tried to get senderPid but it was null."));
       }
     } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
     return senderPid;

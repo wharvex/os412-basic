@@ -1,15 +1,12 @@
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 /** MAINLAND */
-public class Output {
+public class OutputHelper {
   // StackWalker requires Java 9+.
   private static StackWalker.StackFrame getFrame() {
     return StackWalker.getInstance()

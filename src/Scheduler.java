@@ -41,15 +41,38 @@ public class Scheduler {
     waitingRecipients = new ArrayList<>();
   }
 
+  public void populateTLB() {
+    // Get random integers for zeroth and first virtual-to-physical mappings in the TLB.
+    int vz = RandomHelper.getVirt();
+    int pz = RandomHelper.getPhys();
+    int vf = RandomHelper.getVirt();
+    while (vf == vz) {
+      vf = RandomHelper.getVirt();
+    }
+    int pf = RandomHelper.getPhys();
+    while (pf == pz) {
+      pf = RandomHelper.getPhys();
+    }
+
+    // Set zeroth mapping.
+    UserlandProcess.preSetOnTlb(0, 0, vz);
+    UserlandProcess.preSetOnTlb(1, 0, pz);
+
+    // Set first mapping.
+    UserlandProcess.preSetOnTlb(0, 1, vf);
+    UserlandProcess.preSetOnTlb(1, 1, pf);
+  }
+
   public PCB getCurrentlyRunningSafe() {
     try {
       return preGetCurrentlyRunning()
           .orElseThrow(
               () ->
                   new RuntimeException(
-                      Output.getErrorString("Expected Scheduler.currentlyRunning to not be null")));
+                      OutputHelper.getErrorString(
+                          "Expected Scheduler.currentlyRunning to not be null")));
     } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
   }
@@ -59,18 +82,20 @@ public class Scheduler {
   }
 
   public void switchProcess() {
-    Output.debugPrint("Contents of waitingRecipients: " + getWaitingRecipients());
+    populateTLB();
+
+    OutputHelper.debugPrint("Contents of waitingRecipients: " + getWaitingRecipients());
 
     // Get the message-waiters who have messages now.
     var doneWaiters =
         getWaitingRecipients().stream()
             .filter(pcb -> !getWaitingMessagesForPCB(pcb).isEmpty())
             .toList();
-    Output.debugPrint("Initial contents of doneWaiters: " + doneWaiters);
+    OutputHelper.debugPrint("Initial contents of doneWaiters: " + doneWaiters);
 
     // Remove from waitingRecipients the message-waiters who have messages now.
     getWaitingRecipients().removeAll(doneWaiters);
-    Output.debugPrint(
+    OutputHelper.debugPrint(
         "Contents of waitingRecipients after removing doneWaiters: " + getWaitingRecipients());
 
     // Add each doneWaiter's messages to its PCB.
@@ -78,15 +103,15 @@ public class Scheduler {
         doneWaiters.stream()
             .map(pcb -> pcb.addAllToMessagesAndReturnThis(getWaitingMessagesForPCB(pcb)))
             .toList();
-    Output.debugPrint("Contents of donewaiters after adding messages to them:");
-    doneWaiters.forEach(dw -> Output.debugPrint(dw + " -- " + dw.getMessages()));
+    OutputHelper.debugPrint("Contents of donewaiters after adding messages to them:");
+    doneWaiters.forEach(dw -> OutputHelper.debugPrint(dw + " -- " + dw.getMessages()));
 
     // Add all the doneWaiters to the waiting (readyToRun) queue.
     getWQ().addAll(doneWaiters);
 
     // Remove from waitingMessages all the messages that were waiting for the now doneWaiters.
     doneWaiters.forEach(dw -> getWaitingMessages().removeAll(getWaitingMessagesForPCB(dw)));
-    Output.debugPrint(
+    OutputHelper.debugPrint(
         "Contents of waitingMessages after removing"
             + " the messages that were waiting for the doneWaiters: "
             + getWaitingMessages());
@@ -110,10 +135,10 @@ public class Scheduler {
     PCB oldCurRun =
         preGetCurrentlyRunning()
             .orElse(getFromPcbByPidComplete(getPidByName(OS.getContextSwitcher().getThreadName())));
-    Output.debugPrint("oldCurRun threadName: " + oldCurRun.getThreadName());
+    OutputHelper.debugPrint("oldCurRun threadName: " + oldCurRun.getThreadName());
 
     // Mark oldCurRun for stopping based on whether chosenProcess ref-equals oldCurRun.
-    Output.debugPrint(
+    OutputHelper.debugPrint(
         """
 
 
@@ -126,47 +151,47 @@ public class Scheduler {
   }
 
   public synchronized Optional<PCB> getCurrentlyRunning() {
-    Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, this.toString());
-    Output.debugPrint(
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_ENTER, this.toString());
+    OutputHelper.debugPrint(
         "Scheduler.currentlyRunning is "
             + (currentlyRunning != null ? currentlyRunning.getThreadName() : "null"));
     return Optional.ofNullable(currentlyRunning);
   }
 
   public synchronized void setCurrentlyRunning(PCB currentlyRunning) {
-    Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, this.toString());
-    Output.debugPrint(
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_ENTER, this.toString());
+    OutputHelper.debugPrint(
         "Setting Scheduler.currentlyRunning to "
             + (currentlyRunning != null ? currentlyRunning.getThreadName() : "null"));
     this.currentlyRunning = currentlyRunning;
   }
 
   public Optional<PCB> preGetCurrentlyRunning() {
-    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
     var ret = getCurrentlyRunning();
-    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, this.toString());
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_LEAVE, this.toString());
     return ret;
   }
 
   public void preSetCurrentlyRunning(PCB currentlyRunning) {
-    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
     setCurrentlyRunning(currentlyRunning);
-    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, this.toString());
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_LEAVE, this.toString());
   }
 
   public void addToWQ(PCB pcb) {
     getWQ().add(pcb);
-    Output.debugPrint("Added " + pcb.getThreadName() + " to wq");
-    Output.debugPrint("Contents of wq:");
-    getWQ().forEach(wqElm -> Output.debugPrint(wqElm.getThreadName()));
-    Output.debugPrint("Size of wq: " + getWQ().size());
+    OutputHelper.debugPrint("Added " + pcb.getThreadName() + " to wq");
+    OutputHelper.debugPrint("Contents of wq:");
+    getWQ().forEach(wqElm -> OutputHelper.debugPrint(wqElm.getThreadName()));
+    OutputHelper.debugPrint("Size of wq: " + getWQ().size());
   }
 
   private void removeFromWQ(int idx) {
     PCB removed = getWQ().remove(idx);
-    Output.debugPrint("Removed " + removed.getThreadName() + " from wq");
-    Output.debugPrint("Contents of wq:");
-    getWQ().forEach(wqElm -> Output.debugPrint(wqElm.getThreadName()));
+    OutputHelper.debugPrint("Removed " + removed.getThreadName() + " from wq");
+    OutputHelper.debugPrint("Contents of wq:");
+    getWQ().forEach(wqElm -> OutputHelper.debugPrint(wqElm.getThreadName()));
   }
 
   private List<PCB> getWQ() {
@@ -181,7 +206,7 @@ public class Scheduler {
     Random r = new Random();
     int chosenIdx = r.nextInt(getWQ().size());
     PCB chosenProcess = getFromWQ(chosenIdx);
-    Output.debugPrint("The chosen process to switch to is " + chosenProcess.getThreadName());
+    OutputHelper.debugPrint("The chosen process to switch to is " + chosenProcess.getThreadName());
     removeFromWQ(chosenIdx);
     return chosenProcess;
   }
@@ -194,7 +219,7 @@ public class Scheduler {
           .orElseThrow(() -> new RuntimeException("No such thread name"))
           .getKey();
     } catch (RuntimeException e) {
-      Output.writeToFile(e.toString());
+      OutputHelper.writeToFile(e.toString());
       throw e;
     }
   }
@@ -204,12 +229,12 @@ public class Scheduler {
   }
 
   public void startTimer() {
-    Output.debugPrint("Scheduling Timer...");
+    OutputHelper.debugPrint("Scheduling Timer...");
     timer.schedule(
         new TimerTask() {
           @Override
           public void run() {
-            Output.debugPrint("Starting");
+            OutputHelper.debugPrint("Starting");
             preGetCurrentlyRunning()
                 .ifPresentOrElse(
                     // TODO: What happens if the currentlyRunning changes here?
@@ -218,12 +243,12 @@ public class Scheduler {
                     // Timer from its waiting loop.
                     PCB::stop,
                     () -> {
-                      Output.debugPrint("Timer found null CR");
-                      Output.debugPrint(
+                      OutputHelper.debugPrint("Timer found null CR");
+                      OutputHelper.debugPrint(
                           "Bootloader is " + ThreadHelper.getThreadStateString("bootloaderThread"));
-                      Output.debugPrint(
+                      OutputHelper.debugPrint(
                           "Main is " + ThreadHelper.getThreadStateString("mainThread"));
-                      Output.debugPrint(
+                      OutputHelper.debugPrint(
                           "Kernel is " + ThreadHelper.getThreadStateString("kernelThread"));
                     });
           }
@@ -242,11 +267,11 @@ public class Scheduler {
 
   public void addToPcbByPidComplete(PCB pcb, int pid) {
     getPcbByPidComplete().put(pid, pcb);
-    Output.debugPrint("Added " + pcb.getThreadName() + " to pcbByPidComplete");
+    OutputHelper.debugPrint("Added " + pcb.getThreadName() + " to pcbByPidComplete");
     getPcbByPidComplete()
         .forEach(
             (key, value) ->
-                Output.debugPrint(
+                OutputHelper.debugPrint(
                     "Contents of pcbByPidComplete -- Key "
                         + key
                         + "; Value "
@@ -262,15 +287,15 @@ public class Scheduler {
   }
 
   public void addToWaitingMessages(KernelMessage km) {
-    Output.debugPrint("Adding " + km + " to waitingMessages");
+    OutputHelper.debugPrint("Adding " + km + " to waitingMessages");
     getWaitingMessages().add(km);
-    Output.debugPrint("waitingMessages contents: " + getWaitingMessages());
+    OutputHelper.debugPrint("waitingMessages contents: " + getWaitingMessages());
   }
 
   public void addToWaitingRecipients(PCB pcb) {
-    Output.debugPrint("Adding " + pcb.getThreadName() + " to waitingRecipients");
+    OutputHelper.debugPrint("Adding " + pcb.getThreadName() + " to waitingRecipients");
     getWaitingRecipients().add(pcb);
-    Output.debugPrint("Contents of waitingRecipients: " + getWaitingRecipients());
+    OutputHelper.debugPrint("Contents of waitingRecipients: " + getWaitingRecipients());
   }
 
   public PCB getFromWaitingRecipients(int idx) {

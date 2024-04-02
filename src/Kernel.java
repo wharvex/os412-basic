@@ -40,9 +40,14 @@ public class Kernel implements Stoppable, Runnable, Device {
   }
 
   private PCB createPCB(UserlandProcess up, Scheduler.PriorityType pt) {
+    // Create a new PCB.
     PCB pcb = new PCB(up, pt);
-    Output.debugPrint(up.getThreadName() + " has now been created");
+    OutputHelper.debugPrint(up.getThreadName() + " has now been created");
+
+    // Add newly created PCB to the hashmap that finds a PCB by its pid.
     getScheduler().addToPcbByPidComplete(pcb, pcb.getPid());
+
+    // Return the created PCB.
     return pcb;
   }
 
@@ -96,7 +101,7 @@ public class Kernel implements Stoppable, Runnable, Device {
         getScheduler()
             .getFromPcbByPidComplete(
                 getScheduler().getPidByName(getCurrentlyRunningSafe().getThreadName()));
-    Output.debugPrint("Message waiter thread: " + pcb.getThreadName());
+    OutputHelper.debugPrint("Message waiter thread: " + pcb.getThreadName());
 
     // Add message waiter PCB to the waitingRecipients queue.
     getScheduler().addToWaitingRecipients(pcb);
@@ -160,14 +165,14 @@ public class Kernel implements Stoppable, Runnable, Device {
 
   @Override
   public void run() {
-    Output.debugPrint("Initting");
+    OutputHelper.debugPrint("Initting");
     while (true) {
       stop();
 
       // Announce the call type and context switcher.
       var ct = OS.getCallType();
       UnprivilegedContextSwitcher ucs = OS.getContextSwitcher();
-      Output.debugPrint("Handling CallType " + ct + " from " + ucs.getThreadName());
+      OutputHelper.debugPrint("Handling CallType " + ct + " from " + ucs.getThreadName());
 
       // Main run loop.
       switch (ct) {
@@ -180,21 +185,21 @@ public class Kernel implements Stoppable, Runnable, Device {
 
       // Start the new currentlyRunning.
       PCB newCurRun = getCurrentlyRunningSafe();
-      Output.debugPrint("Start the new currentlyRunning");
+      OutputHelper.debugPrint("Start the new currentlyRunning");
       newCurRun.start();
 
       // Check if we should start the UCS.
-      Output.debugPrint(
+      OutputHelper.debugPrint(
           """
 
 
                       If contextSwitcher is not the new curRun, start the contextSwitcher.
                       We ensure this because if it is the new curRun, it was already started""");
       if (ucs != newCurRun.getUserlandProcess()) {
-        Output.debugPrint("OS.contextSwitcher is not the new curRun, starting the former...");
+        OutputHelper.debugPrint("OS.contextSwitcher is not the new curRun, starting the former...");
         ucs.start();
       } else {
-        Output.debugPrint("OS.contextSwitcher is the new curRun, so it's already started...");
+        OutputHelper.debugPrint("OS.contextSwitcher is the new curRun, so it's already started...");
       }
     }
   }

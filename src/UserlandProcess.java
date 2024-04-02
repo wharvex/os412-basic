@@ -11,6 +11,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   private final Semaphore semaphore;
   private final Thread thread;
   private final List<Object> csRets;
+  private final List<Object> swiProRets;
   private final List<KernelMessage> messages;
   private boolean shouldStopFromTimeout;
   private Boolean shouldStopAfterContextSwitch;
@@ -20,12 +21,41 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     thread = new Thread(this, threadNameBase + "Thread_" + debugPid);
     semaphore = new Semaphore(0);
     csRets = new ArrayList<>();
+    swiProRets = new ArrayList<>();
     messages = new ArrayList<>();
     shouldStopFromTimeout = false;
   }
 
-  private static int[][] getTlb() {
+  private static synchronized int[][] getTlb() {
     return TLB;
+  }
+
+  private static synchronized int getFromTlb(int vOrP, int zOrF) {
+    var ret = getTlb()[vOrP][zOrF];
+    OutputHelper.debugPrint("TLB[" + vOrP + "][" + zOrF + "] is " + ret);
+    return ret;
+  }
+
+  private static synchronized void setOnTlb(int vOrP, int zOrF, int val) {
+    OutputHelper.debugPrint("Setting TLB[" + vOrP + "][" + zOrF + "] to " + val);
+    getTlb()[vOrP][zOrF] = val;
+  }
+
+  public static synchronized int preGetFromTlb(int vOrP, int zOrF) {
+    OutputHelper.debugPrint(
+        OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, UserlandProcess.class.toString());
+    var ret = getFromTlb(vOrP, zOrF);
+    OutputHelper.debugPrint(
+        OutputHelper.DebugOutputType.SYNC_LEAVE, UserlandProcess.class.toString());
+    return ret;
+  }
+
+  public static synchronized void preSetOnTlb(int vOrP, int zOrF, int val) {
+    OutputHelper.debugPrint(
+        OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, UserlandProcess.class.toString());
+    setOnTlb(vOrP, zOrF, val);
+    OutputHelper.debugPrint(
+        OutputHelper.DebugOutputType.SYNC_LEAVE, UserlandProcess.class.toString());
   }
 
   /** Only called by Timer thread via PCB. */
@@ -34,33 +64,33 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   }
 
   public synchronized boolean isStopRequested() {
-    Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, this.toString());
-    Output.debugPrint("stopRequested is " + shouldStopFromTimeout);
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_ENTER, this.toString());
+    OutputHelper.debugPrint("stopRequested is " + shouldStopFromTimeout);
     return shouldStopFromTimeout;
   }
 
   public synchronized void setStopRequested(boolean isRequested) {
-    Output.debugPrint(Output.DebugOutputType.SYNC_ENTER, this.toString());
-    Output.debugPrint("Setting stopRequested to " + isRequested);
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_ENTER, this.toString());
+    OutputHelper.debugPrint("Setting stopRequested to " + isRequested);
     shouldStopFromTimeout = isRequested;
   }
 
   public void preSetStopRequested(boolean isRequested) {
-    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
-    Output.debugPrint("About to enter setStopRequested");
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
+    OutputHelper.debugPrint("About to enter setStopRequested");
     setStopRequested(isRequested);
-    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, this.toString());
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_LEAVE, this.toString());
   }
 
   public boolean preIsStopRequested() {
-    Output.debugPrint(Output.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, this.toString());
     var ret = isStopRequested();
-    Output.debugPrint(Output.DebugOutputType.SYNC_LEAVE, this.toString());
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_LEAVE, this.toString());
     return ret;
   }
 
   public void cooperate() {
-    Output.debugPrint("Cooperating...");
+    OutputHelper.debugPrint("Cooperating...");
     if (preIsStopRequested()) {
       OS.switchProcess(this);
     }
@@ -78,7 +108,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
 
   @Override
   public void run() {
-    Output.debugPrint(Output.DebugOutputType.INIT);
+    OutputHelper.debugPrint(OutputHelper.DebugOutputType.INIT);
     stop();
     main();
   }
@@ -94,7 +124,8 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
   }
 
   public void setShouldStopAfterContextSwitch(boolean shouldStopAfterContextSwitch) {
-    Output.debugPrint("Setting shouldStopAfterContextSwitch to " + shouldStopAfterContextSwitch);
+    OutputHelper.debugPrint(
+        "Setting shouldStopAfterContextSwitch to " + shouldStopAfterContextSwitch);
     this.shouldStopAfterContextSwitch = shouldStopAfterContextSwitch;
   }
 
@@ -114,64 +145,30 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
 
   public void waitUntilStoppedByRequest() {
     while (preIsStopRequested()) {
-      Output.debugPrint("Waiting for " + getThreadName() + " to stop from request");
+      OutputHelper.debugPrint("Waiting for " + getThreadName() + " to stop from request");
       ThreadHelper.threadSleep(10);
     }
   }
 
-  private int getFromTlb(int vOrP, int zOrF) {
-    return getTlb()[vOrP][zOrF];
-  }
-
-  private void setOnTlb(int vOrP, int zOrF, int val) {
-    getTlb()[vOrP][zOrF] = val;
-  }
-
-  public byte read(int address) {
-    int virtualPageNumber = address / OS.getPageSize();
-    int pageOffset = address % OS.getPageSize();
+  public byte read(int virtualAddress) {
+    int virtualPageNumber = virtualAddress / OS.getPageSize();
+    OutputHelper.debugPrint("virtualPageNumber: " + virtualPageNumber);
+    int pageOffset = virtualAddress % OS.getPageSize();
+    OutputHelper.debugPrint("offset: " + pageOffset);
+    int physicalPageNumber = matchAndReturnPhys(virtualPageNumber).orElse(-1);
+    OutputHelper.debugPrint("physicalPageNumber: " + physicalPageNumber);
+    int physicalAddress = (physicalPageNumber * OS.getPageSize()) + pageOffset;
+    OutputHelper.debugPrint("physicalAddress: " + physicalAddress);
     return 0;
   }
 
   public void write(int address, byte value) {}
 
-  private int getVirtZerothFromTlb() {
-    return getFromTlb(0, 0);
-  }
-
-  private void setVirtZerothOnTlb(int vz) {
-    setOnTlb(0, 0, vz);
-  }
-
-  private int getVirtFirstFromTlb() {
-    return getFromTlb(0, 1);
-  }
-
-  private void setVirtFirstOnTlb(int vf) {
-    setOnTlb(0, 1, vf);
-  }
-
-  private int getPhysZerothFromTlb() {
-    return getFromTlb(1, 0);
-  }
-
-  private void setPhysZerothOnTlb(int pz) {
-    setOnTlb(1, 0, pz);
-  }
-
-  private int getPhysFirstFromTlb() {
-    return getFromTlb(1, 1);
-  }
-
-  private void setPhysFirstOnTlb(int pf) {
-    setOnTlb(1, 1, pf);
-  }
-
-  private OptionalInt matchAndReturnPhys(int virtualPageNumber) {
-    if (getVirtZerothFromTlb() == virtualPageNumber) {
-      return OptionalInt.of(getPhysZerothFromTlb());
-    } else if (getVirtFirstFromTlb() == virtualPageNumber) {
-      return OptionalInt.of(getPhysFirstFromTlb());
+  protected OptionalInt matchAndReturnPhys(int virtualPageNumber) {
+    if (preGetFromTlb(0, 0) == virtualPageNumber) {
+      return OptionalInt.of(preGetFromTlb(1, 0));
+    } else if (preGetFromTlb(0, 1) == virtualPageNumber) {
+      return OptionalInt.of(preGetFromTlb(1, 1));
     } else {
       return OptionalInt.empty();
     }

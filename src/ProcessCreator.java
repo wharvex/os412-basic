@@ -25,10 +25,11 @@ public class ProcessCreator extends UserlandProcess {
   }
 
   private void debugPrintOtherThreads() {
-    Output.debugPrint("Bootloader is " + ThreadHelper.getThreadStateString("bootloaderThread"));
-    Output.debugPrint("Main is " + ThreadHelper.getThreadStateString("mainThread"));
-    Output.debugPrint("Kernel is " + ThreadHelper.getThreadStateString("kernelThread"));
-    Output.debugPrint("Timer is " + ThreadHelper.getThreadStateString("timerThread"));
+    OutputHelper.debugPrint(
+        "Bootloader is " + ThreadHelper.getThreadStateString("bootloaderThread"));
+    OutputHelper.debugPrint("Main is " + ThreadHelper.getThreadStateString("mainThread"));
+    OutputHelper.debugPrint("Kernel is " + ThreadHelper.getThreadStateString("kernelThread"));
+    OutputHelper.debugPrint("Timer is " + ThreadHelper.getThreadStateString("timerThread"));
   }
 
   private void testMessages(int iterationCounter) {
@@ -36,7 +37,7 @@ public class ProcessCreator extends UserlandProcess {
     switch (iterationCounter) {
       case 1:
         // Create Ping.
-        Output.print("ProcessCreator creating Ping");
+        OutputHelper.print("ProcessCreator creating Ping");
         OS.createProcess(
             this,
             new Ping(),
@@ -45,7 +46,7 @@ public class ProcessCreator extends UserlandProcess {
         break;
       case 2:
         // Create Pong.
-        Output.print("ProcessCreator creating Pong");
+        OutputHelper.print("ProcessCreator creating Pong");
         OS.createProcess(
             this,
             new Pong(),
@@ -54,19 +55,19 @@ public class ProcessCreator extends UserlandProcess {
         break;
       case 3:
         // Send Pong's pid to Ping.
-        Output.print("ProcessCreator sending message to ping with content: Pong's pid");
+        OutputHelper.print("ProcessCreator sending message to ping with content: Pong's pid");
         OS.sendMessage(
             this,
             new KernelMessage(getPingPids().getFirst(), 1, getPongPids().getFirst().toString()));
       case 4:
         // Send Ping's pid to Pong.
-        Output.print("ProcessCreator sending message to pong with content: Ping's pid");
+        OutputHelper.print("ProcessCreator sending message to pong with content: Ping's pid");
         OS.sendMessage(
             this,
             new KernelMessage(getPongPids().getFirst(), 1, getPingPids().getFirst().toString()));
       default:
         // Done.
-        Output.print("ProcessCreator done testing messages.");
+        OutputHelper.print("ProcessCreator done testing messages.");
         debugPrintOtherThreads();
     }
   }
@@ -76,7 +77,7 @@ public class ProcessCreator extends UserlandProcess {
     switch (iterationCounter) {
       case 1:
         // Create MemoryTestA.
-        Output.print("ProcessCreator creating MemoryTestA");
+        OutputHelper.print("ProcessCreator creating MemoryTestA");
         OS.createProcess(
             this,
             new MemoryTestA(),
@@ -85,7 +86,7 @@ public class ProcessCreator extends UserlandProcess {
         break;
       case 2:
         // Create MemoryTestA.
-        Output.print("ProcessCreator creating MemoryTestB");
+        OutputHelper.print("ProcessCreator creating MemoryTestB");
         OS.createProcess(
             this,
             new MemoryTestB(),
@@ -94,9 +95,9 @@ public class ProcessCreator extends UserlandProcess {
         break;
       default:
         // Done.
-        Output.print("ProcessCreator done testing memory.");
-        Output.print("ProcessCreator says: MemoryTestA pid: " + getMemTestAPids().getFirst());
-        Output.print("ProcessCreator says: MemoryTestB pid: " + getMemTestBPids().getFirst());
+        OutputHelper.print("ProcessCreator done testing memory.");
+        OutputHelper.print("ProcessCreator says: MemoryTestA pid: " + getMemTestAPids().getFirst());
+        OutputHelper.print("ProcessCreator says: MemoryTestB pid: " + getMemTestBPids().getFirst());
         debugPrintOtherThreads();
     }
   }
@@ -106,7 +107,7 @@ public class ProcessCreator extends UserlandProcess {
     int i = 0;
     while (true) {
       // Initial announcement.
-      Output.print("Hello from ProcessCreator. Times printed: " + (++i));
+      OutputHelper.print("Hello from ProcessCreator. Times printed: " + (++i));
 
       // Test messages.
       // testMessages(i);
@@ -129,26 +130,26 @@ public class ProcessCreator extends UserlandProcess {
   }
 
   public void addToPingPids(int pid) {
-    Output.debugPrint("Adding " + pid + " to pingPids");
+    OutputHelper.debugPrint("Adding " + pid + " to pingPids");
     getPingPids().add(pid);
-    Output.debugPrint("Contents of pingPids: " + getPingPids());
+    OutputHelper.debugPrint("Contents of pingPids: " + getPingPids());
   }
 
   public void addToPongPids(int pid) {
-    Output.debugPrint("Adding " + pid + " to pongPids");
+    OutputHelper.debugPrint("Adding " + pid + " to pongPids");
     getPongPids().add(pid);
-    Output.debugPrint("Contents of pongPids: " + getPongPids());
+    OutputHelper.debugPrint("Contents of pongPids: " + getPongPids());
   }
 
   public void addToMemTestAPids(int pid) {
-    Output.debugPrint("Adding " + pid + " to memTestAPids");
+    OutputHelper.debugPrint("Adding " + pid + " to memTestAPids");
     getMemTestAPids().add(pid);
-    Output.debugPrint("Contents of memTestAPids: " + getMemTestAPids());
+    OutputHelper.debugPrint("Contents of memTestAPids: " + getMemTestAPids());
   }
 
   public void addToMemTestBPids(int pid) {
-    Output.debugPrint("Adding " + pid + " to memTestBPids");
+    OutputHelper.debugPrint("Adding " + pid + " to memTestBPids");
     getMemTestBPids().add(pid);
-    Output.debugPrint("Contents of memTestBPids: " + getMemTestBPids());
+    OutputHelper.debugPrint("Contents of memTestBPids: " + getMemTestBPids());
   }
 }
