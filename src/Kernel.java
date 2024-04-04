@@ -1,7 +1,4 @@
-import java.util.HashMap;
 import java.util.concurrent.Semaphore;
-import java.util.function.IntBinaryOperator;
-import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 /** KERNELLAND */
@@ -10,7 +7,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   private final Thread thread;
   private final Scheduler scheduler;
   private final VFS vfs;
-  private final int[] intArr;
+  private final int[] fileManagerIntArr;
   private final boolean[] freeSpace = new boolean[OS.getFreeSpaceSize()];
 
   public Kernel() {
@@ -18,8 +15,12 @@ public class Kernel implements Stoppable, Runnable, Device {
     thread = new Thread(this, "kernelThread");
     scheduler = new Scheduler();
     vfs = new VFS();
-    intArr = IntStream.generate(() -> -1).limit(10).toArray();
-    IntStream.range(0, OS.getFreeSpaceSize()).forEach(i -> freeSpace[i] = true);
+    fileManagerIntArr = IntStream.generate(() -> -1).limit(10).toArray();
+    IntStream.range(0, 3).forEach(i -> freeSpace[i] = false);
+    IntStream.range(3, 6).forEach(i -> freeSpace[i] = true);
+    IntStream.range(6, 9).forEach(i -> freeSpace[i] = false);
+    IntStream.range(9, 13).forEach(i -> freeSpace[i] = true);
+    IntStream.range(13, OS.getFreeSpaceSize()).forEach(i -> freeSpace[i] = false);
   }
 
   public boolean[] getFreeSpace() {
@@ -27,7 +28,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   }
 
   public boolean getFromFreeSpace(int idx) {
-    return getFreeSpace()[idx];
+    return getFreeSpace().length > idx && getFreeSpace()[idx];
   }
 
   public void setOnFreeSpace(int idx, boolean val) {
@@ -133,38 +134,21 @@ public class Kernel implements Stoppable, Runnable, Device {
     getScheduler().switchProcess(getScheduler()::getRandFromWQ);
   }
 
-  private int recordSize(HashMap<Integer, Integer> sizeIndices, int idx, int size) {
-    sizeIndices.put(idx, size);
-    return size;
-  }
-
   private void allocateMemory() {
     int amountToAllocate = (int) OS.getParam(0);
     OutputHelper.debugPrint("Allocating " + amountToAllocate + " bytes of memory");
-    // Search UserlandProcess.PHYSICAL_MEMORY via Kernel.freeMemory for a contiguous block of size
-    // amountToAllocate. OS.retVal should then be set to the starting index of this block.
-    int[] maxSize = {0};
-    IntBinaryOperator saveSizeAndReturnAcc =
-        (acc, ms) -> {
-          maxSize[0] = ms;
-          return acc;
-        };
-    IntFunction<Integer> zeroSizeAndReturnIdx =
-        idx -> {
-          maxSize[0] = 0;
-          return idx;
-        };
+
+    // Search UserlandProcess.PHYSICAL_MEMORY via Kernel.freeSpace for a contiguous block of size
+    // amountToAllocate.
     int startingIdx =
         IntStream.range(0, OS.getFreeSpaceSize())
-            .takeWhile(i -> maxSize[0] < amountToAllocate)
-            .reduce(
-                0,
-                (acc, idx) ->
-                    getFromFreeSpace(idx)
-                        ? saveSizeAndReturnAcc.applyAsInt(acc, maxSize[0] + 1)
-                        : zeroSizeAndReturnIdx.apply(idx));
+            .filter(i -> IntStream.range(i, i + amountToAllocate).allMatch(this::getFromFreeSpace))
+            .findFirst()
+            .orElse(-1);
+
+    // Set OS.retVal to the starting index of this block.
     OS.setRetValOnOS(startingIdx);
-    getScheduler().switchProcess(this::getCurrentlyRunningSafe);
+    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
   }
 
   // ------------------------------------- FILESYSTEM METHODS -------------------------------------
@@ -174,8 +158,8 @@ public class Kernel implements Stoppable, Runnable, Device {
   }
 
   private int getEmptyPosition() {
-    for (int i = 0; i < intArr.length; i++) {
-      if (intArr[i] != -1) {
+    for (int i = 0; i < fileManagerIntArr.length; i++) {
+      if (fileManagerIntArr[i] != -1) {
         return i;
       }
     }
@@ -192,7 +176,7 @@ public class Kernel implements Stoppable, Runnable, Device {
     if (vfsID == -1) {
       throw new RuntimeException("VFS ID was -1: fail.");
     }
-    intArr[emptyPosition] = vfsID;
+    fileManagerIntArr[emptyPosition] = vfsID;
     return emptyPosition;
   }
 
