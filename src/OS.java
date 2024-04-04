@@ -9,6 +9,7 @@ import java.util.function.BiConsumer;
 public class OS {
   private static final int PAGE_SIZE = 1024;
   private static final int MEMORY_MAP_SIZE = 100;
+  private static final int FREE_SPACE_SIZE = 1000;
   private static final List<Object> PARAMS = new ArrayList<>();
   private static final int TLB_SIZE = 2;
   private static Kernel kernel;
@@ -23,6 +24,10 @@ public class OS {
 
   public static int getMemoryMapSize() {
     return MEMORY_MAP_SIZE;
+  }
+
+  public static int getFreeSpaceSize() {
+    return FREE_SPACE_SIZE;
   }
 
   public static int getTlbSize() {
@@ -367,6 +372,13 @@ public class OS {
     switchContext(ucs, CallType.SWITCH_PROCESS);
   }
 
+  public static void allocateMemory(
+      UnprivilegedContextSwitcher cs,
+      BiConsumer<UnprivilegedContextSwitcher, Object> retSaver,
+      int size) {
+    switchContext(cs, CallType.ALLOCATE_MEMORY, retSaver, size);
+  }
+
   public static List<KernelMessage> getMessages() {
     return messages;
   }
@@ -394,6 +406,10 @@ public class OS {
     SWITCH_PROCESS,
     SLEEP,
     WAIT_FOR_MESSAGE,
-    SEND_MESSAGE
+    SEND_MESSAGE,
+    GET_MAPPING,
+    ALLOCATE_MEMORY,
+    FREE_MEMORY,
+    EXIT
   }
 }

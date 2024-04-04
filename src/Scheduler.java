@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * KERNELLAND
@@ -43,15 +44,15 @@ public class Scheduler {
 
   public void populateTLB() {
     // Get random integers for zeroth and first virtual-to-physical mappings in the TLB.
-    int vz = RandomHelper.getVirt();
-    int pz = RandomHelper.getPhys();
-    int vf = RandomHelper.getVirt();
+    int vz = RandomHelper.getVirtPageNum();
+    int pz = RandomHelper.getPhysPageNum();
+    int vf = RandomHelper.getVirtPageNum();
     while (vf == vz) {
-      vf = RandomHelper.getVirt();
+      vf = RandomHelper.getVirtPageNum();
     }
-    int pf = RandomHelper.getPhys();
+    int pf = RandomHelper.getPhysPageNum();
     while (pf == pz) {
-      pf = RandomHelper.getPhys();
+      pf = RandomHelper.getPhysPageNum();
     }
 
     // Set zeroth mapping.
@@ -81,11 +82,7 @@ public class Scheduler {
     return getWaitingMessages().stream().filter(km -> km.getTargetPid() == pcb.getPid()).toList();
   }
 
-  public void switchProcess() {
-    populateTLB();
-
-    OutputHelper.debugPrint("Contents of waitingRecipients: " + getWaitingRecipients());
-
+  private void handleMessages() {
     // Get the message-waiters who have messages now.
     var doneWaiters =
         getWaitingRecipients().stream()
@@ -115,6 +112,12 @@ public class Scheduler {
         "Contents of waitingMessages after removing"
             + " the messages that were waiting for the doneWaiters: "
             + getWaitingMessages());
+  }
+
+  public void switchProcess(Supplier<PCB> processChooser) {
+    populateTLB();
+
+    handleMessages();
 
     // Add CR to WQ if CR is not null.
     // Pro-tip: Set CR to null right before calling switchProcess if you don't want to give it a
@@ -123,7 +126,7 @@ public class Scheduler {
     preGetCurrentlyRunning().ifPresent(this::addToWQ);
 
     // Choose the new process to run.
-    PCB chosenProcess = getRandFromWQ();
+    PCB chosenProcess = processChooser.get();
 
     // Save the chosen process' messages to OS.
     OS.setMessages(chosenProcess.getMessages());
@@ -142,8 +145,8 @@ public class Scheduler {
         """
 
 
-                    If the chosen process doesn't equal the old curRun,
-                    the old curRun should stop after the context switch""");
+                        If the chosen process doesn't equal the old curRun,
+                        the old curRun should stop after the context switch""");
     oldCurRun.getUserlandProcess().setShouldStopAfterContextSwitch(chosenProcess != oldCurRun);
 
     // Set currentlyRunning to the chosen process.

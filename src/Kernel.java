@@ -1,4 +1,7 @@
+import java.util.HashMap;
 import java.util.concurrent.Semaphore;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 /** KERNELLAND */
@@ -8,6 +11,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   private final Scheduler scheduler;
   private final VFS vfs;
   private final int[] intArr;
+  private final boolean[] freeSpace = new boolean[OS.getFreeSpaceSize()];
 
   public Kernel() {
     semaphore = new Semaphore(0);
@@ -15,6 +19,19 @@ public class Kernel implements Stoppable, Runnable, Device {
     scheduler = new Scheduler();
     vfs = new VFS();
     intArr = IntStream.generate(() -> -1).limit(10).toArray();
+    IntStream.range(0, OS.getFreeSpaceSize()).forEach(i -> freeSpace[i] = true);
+  }
+
+  public boolean[] getFreeSpace() {
+    return freeSpace;
+  }
+
+  public boolean getFromFreeSpace(int idx) {
+    return getFreeSpace()[idx];
+  }
+
+  public void setOnFreeSpace(int idx, boolean val) {
+    getFreeSpace()[idx] = val;
   }
 
   // ------------------------------------- STOPPABLE OVERRIDES -------------------------------------
@@ -70,12 +87,12 @@ public class Kernel implements Stoppable, Runnable, Device {
     pcb.init();
     getScheduler().addToWQ(pcb);
     OS.setRetValOnOS(pcb.getPid());
-    getScheduler().switchProcess();
+    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
   }
 
   private void switchProcess() {
     OS.setRetValOnOS(null);
-    getScheduler().switchProcess();
+    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
   }
 
   private void sendMessage() {
@@ -92,7 +109,7 @@ public class Kernel implements Stoppable, Runnable, Device {
     OS.setRetValOnOS(null);
 
     // Give another process a chance to run.
-    getScheduler().switchProcess();
+    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
   }
 
   private void waitForMessage() {
@@ -113,7 +130,41 @@ public class Kernel implements Stoppable, Runnable, Device {
     OS.setRetValOnOS(null);
 
     // Give another process a chance to run.
-    getScheduler().switchProcess();
+    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
+  }
+
+  private int recordSize(HashMap<Integer, Integer> sizeIndices, int idx, int size) {
+    sizeIndices.put(idx, size);
+    return size;
+  }
+
+  private void allocateMemory() {
+    int amountToAllocate = (int) OS.getParam(0);
+    OutputHelper.debugPrint("Allocating " + amountToAllocate + " bytes of memory");
+    // Search UserlandProcess.PHYSICAL_MEMORY via Kernel.freeMemory for a contiguous block of size
+    // amountToAllocate. OS.retVal should then be set to the starting index of this block.
+    int[] maxSize = {0};
+    IntBinaryOperator saveSizeAndReturnAcc =
+        (acc, ms) -> {
+          maxSize[0] = ms;
+          return acc;
+        };
+    IntFunction<Integer> zeroSizeAndReturnIdx =
+        idx -> {
+          maxSize[0] = 0;
+          return idx;
+        };
+    int startingIdx =
+        IntStream.range(0, OS.getFreeSpaceSize())
+            .takeWhile(i -> maxSize[0] < amountToAllocate)
+            .reduce(
+                0,
+                (acc, idx) ->
+                    getFromFreeSpace(idx)
+                        ? saveSizeAndReturnAcc.applyAsInt(acc, maxSize[0] + 1)
+                        : zeroSizeAndReturnIdx.apply(idx));
+    OS.setRetValOnOS(startingIdx);
+    getScheduler().switchProcess(this::getCurrentlyRunningSafe);
   }
 
   // ------------------------------------- FILESYSTEM METHODS -------------------------------------
@@ -181,6 +232,7 @@ public class Kernel implements Stoppable, Runnable, Device {
         case SWITCH_PROCESS -> switchProcess();
         case SEND_MESSAGE -> sendMessage();
         case WAIT_FOR_MESSAGE -> waitForMessage();
+        case ALLOCATE_MEMORY -> allocateMemory();
       }
 
       // Start the new currentlyRunning.

@@ -5,23 +5,23 @@ import java.util.List;
 public class ProcessCreator extends UserlandProcess {
   private final List<Integer> pingPids;
   private final List<Integer> pongPids;
-  private final List<Integer> memTestAPids;
-  private final List<Integer> memTestBPids;
+  private final List<Integer> pagingTestAPids;
+  private final List<Integer> pagingTestBPids;
 
   public ProcessCreator() {
     super("0", "processCreator");
     pingPids = new ArrayList<>();
     pongPids = new ArrayList<>();
-    memTestAPids = new ArrayList<>();
-    memTestBPids = new ArrayList<>();
+    pagingTestAPids = new ArrayList<>();
+    pagingTestBPids = new ArrayList<>();
   }
 
-  public List<Integer> getMemTestAPids() {
-    return memTestAPids;
+  public List<Integer> getPagingTestAPids() {
+    return pagingTestAPids;
   }
 
-  public List<Integer> getMemTestBPids() {
-    return memTestBPids;
+  public List<Integer> getPagingTestBPids() {
+    return pagingTestBPids;
   }
 
   private void debugPrintOtherThreads() {
@@ -72,32 +72,34 @@ public class ProcessCreator extends UserlandProcess {
     }
   }
 
-  private void testMemory(int iterationCounter) {
+  private void testPaging(int iterationCounter) {
     // Choose what to do based on iteration counter.
     switch (iterationCounter) {
       case 1:
-        // Create MemoryTestA.
-        OutputHelper.print("ProcessCreator creating MemoryTestA");
+        // Create PagingTestA.
+        OutputHelper.print("ProcessCreator creating PagingTestA");
         OS.createProcess(
             this,
-            new MemoryTestA(),
+            new PagingTestA(),
             Scheduler.PriorityType.INTERACTIVE,
-            (ucs, pid) -> ((ProcessCreator) ucs).addToMemTestAPids((int) pid));
+            (ucs, pid) -> ((ProcessCreator) ucs).addToPagingTestAPids((int) pid));
         break;
       case 2:
-        // Create MemoryTestA.
-        OutputHelper.print("ProcessCreator creating MemoryTestB");
+        // Create PagingTestB.
+        OutputHelper.print("ProcessCreator creating PagingTestB");
         OS.createProcess(
             this,
-            new MemoryTestB(),
+            new PagingTestB(),
             Scheduler.PriorityType.INTERACTIVE,
-            (ucs, pid) -> ((ProcessCreator) ucs).addToMemTestBPids((int) pid));
+            (ucs, pid) -> ((ProcessCreator) ucs).addToPagingTestBPids((int) pid));
         break;
       default:
         // Done.
-        OutputHelper.print("ProcessCreator done testing memory.");
-        OutputHelper.print("ProcessCreator says: MemoryTestA pid: " + getMemTestAPids().getFirst());
-        OutputHelper.print("ProcessCreator says: MemoryTestB pid: " + getMemTestBPids().getFirst());
+        OutputHelper.print("ProcessCreator done testing paging.");
+        OutputHelper.print(
+            "ProcessCreator says: PagingTestA pid: " + getPagingTestAPids().getFirst());
+        OutputHelper.print(
+            "ProcessCreator says: PagingTestB pid: " + getPagingTestBPids().getFirst());
         debugPrintOtherThreads();
     }
   }
@@ -113,7 +115,7 @@ public class ProcessCreator extends UserlandProcess {
       // testMessages(i);
 
       // Test memory.
-      testMemory(i);
+      testPaging(i);
 
       // Sleep and cooperate.
       ThreadHelper.threadSleep(1000);
@@ -141,15 +143,15 @@ public class ProcessCreator extends UserlandProcess {
     OutputHelper.debugPrint("Contents of pongPids: " + getPongPids());
   }
 
-  public void addToMemTestAPids(int pid) {
-    OutputHelper.debugPrint("Adding " + pid + " to memTestAPids");
-    getMemTestAPids().add(pid);
-    OutputHelper.debugPrint("Contents of memTestAPids: " + getMemTestAPids());
+  public void addToPagingTestAPids(int pid) {
+    OutputHelper.debugPrint("Adding " + pid + " to pagingTestAPids");
+    getPagingTestAPids().add(pid);
+    OutputHelper.debugPrint("Contents of pagingTestAPids: " + getPagingTestAPids());
   }
 
-  public void addToMemTestBPids(int pid) {
-    OutputHelper.debugPrint("Adding " + pid + " to memTestBPids");
-    getMemTestBPids().add(pid);
-    OutputHelper.debugPrint("Contents of memTestBPids: " + getMemTestBPids());
+  public void addToPagingTestBPids(int pid) {
+    OutputHelper.debugPrint("Adding " + pid + " to pagingTestBPids");
+    getPagingTestBPids().add(pid);
+    OutputHelper.debugPrint("Contents of pagingTestBPids: " + getPagingTestBPids());
   }
 }

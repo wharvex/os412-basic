@@ -1,12 +1,12 @@
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomHelper {
-  public static int getVirt() {
-    return ThreadLocalRandom.current().nextInt(1, 11);
+  public static int getVirtPageNum() {
+    return ThreadLocalRandom.current().nextInt(0, OS.getMemoryMapSize());
   }
 
-  public static int getPhys() {
-    return ThreadLocalRandom.current().nextInt(11, 21);
+  public static int getPhysPageNum() {
+    return ThreadLocalRandom.current().nextInt(0, OS.getPageSize());
   }
 
   public static int getAddress() {
