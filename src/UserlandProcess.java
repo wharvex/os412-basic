@@ -5,8 +5,8 @@ import java.util.concurrent.Semaphore;
 
 /** USERLAND */
 public abstract class UserlandProcess implements Runnable, UnprivilegedContextSwitcher {
+  public static final byte[] PHYSICAL_MEMORY = new byte[OS.getPhysicalMemorySize()];
   private static final int[][] TLB = new int[OS.getTlbSize()][OS.getTlbSize()];
-  private static final byte[] PHYSICAL_MEMORY = new byte[OS.getPageSize() * OS.getPageSize()];
   private final String debugPid;
   private final Semaphore semaphore;
   private final Thread thread;
@@ -30,6 +30,31 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     return TLB;
   }
 
+  public static synchronized byte getFromPhysicalMemory(int idx) {
+    return PHYSICAL_MEMORY[idx];
+  }
+
+  public static synchronized void setOnPhysicalMemory(int idx, byte val) {
+    PHYSICAL_MEMORY[idx] = val;
+  }
+
+  public static byte preGetFromPhysicalMemory(int idx) {
+    OutputHelper.debugPrint(
+        OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, UserlandProcess.class.toString());
+    var ret = getFromPhysicalMemory(idx);
+    OutputHelper.debugPrint(
+        OutputHelper.DebugOutputType.SYNC_LEAVE, UserlandProcess.class.toString());
+    return ret;
+  }
+
+  public static void preSetOnPhysicalMemory(int idx, byte val) {
+    OutputHelper.debugPrint(
+        OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, UserlandProcess.class.toString());
+    setOnPhysicalMemory(idx, val);
+    OutputHelper.debugPrint(
+        OutputHelper.DebugOutputType.SYNC_LEAVE, UserlandProcess.class.toString());
+  }
+
   private static synchronized int getFromTlb(int vOrP, int zOrF) {
     var ret = getTlb()[vOrP][zOrF];
     OutputHelper.debugPrint("TLB[" + vOrP + "][" + zOrF + "] is " + ret);
@@ -41,7 +66,7 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     getTlb()[vOrP][zOrF] = val;
   }
 
-  public static synchronized int preGetFromTlb(int vOrP, int zOrF) {
+  public static int preGetFromTlb(int vOrP, int zOrF) {
     OutputHelper.debugPrint(
         OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER, UserlandProcess.class.toString());
     var ret = getFromTlb(vOrP, zOrF);
@@ -150,19 +175,32 @@ public abstract class UserlandProcess implements Runnable, UnprivilegedContextSw
     }
   }
 
-  public byte read(int virtualAddress) {
-    int virtualPageNumber = virtualAddress / OS.getPageSize();
+  private int getPhysAddr(int virtAddr) {
+    int virtualPageNumber = virtAddr / OS.getPageSize();
     OutputHelper.debugPrint("virtualPageNumber: " + virtualPageNumber);
-    int pageOffset = virtualAddress % OS.getPageSize();
+    int pageOffset = virtAddr % OS.getPageSize();
     OutputHelper.debugPrint("offset: " + pageOffset);
     int physicalPageNumber = matchAndReturnPhys(virtualPageNumber).orElse(-1);
     OutputHelper.debugPrint("physicalPageNumber: " + physicalPageNumber);
     int physicalAddress = (physicalPageNumber * OS.getPageSize()) + pageOffset;
     OutputHelper.debugPrint("physicalAddress: " + physicalAddress);
-    return 0;
+    return physicalAddress;
   }
 
-  public void write(int address, byte value) {}
+  public byte read(int virtualAddress) {
+    int physAddr = getPhysAddr(virtualAddress);
+    if (physAddr >= 0) {
+      return preGetFromPhysicalMemory(physAddr);
+    }
+    return -1;
+  }
+
+  public void write(int virtualAddress, byte value) {
+    int physAddr = getPhysAddr(virtualAddress);
+    if (physAddr >= 0) {
+      preSetOnPhysicalMemory(physAddr, value);
+    }
+  }
 
   protected OptionalInt matchAndReturnPhys(int virtualPageNumber) {
     if (preGetFromTlb(0, 0) == virtualPageNumber) {

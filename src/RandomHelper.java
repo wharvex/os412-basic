@@ -6,7 +6,7 @@ public class RandomHelper {
   }
 
   public static int getPhysPageNum() {
-    return ThreadLocalRandom.current().nextInt(0, OS.getPageSize());
+    return ThreadLocalRandom.current().nextInt(0, OS.getFreeSpaceSize());
   }
 
   public static int getAddress() {

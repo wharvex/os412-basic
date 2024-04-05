@@ -1,22 +1,22 @@
-public class EventBag {
+public class EventLogger {
   private final String threadName;
   private final String className;
   private final String methodName;
   private final String description;
-  private EventBag nextEvent;
+  private EventLogger nextEvent;
 
-  public EventBag(String threadName, String className, String methodName, String description) {
+  public EventLogger(String threadName, String className, String methodName, String description) {
     this.threadName = threadName;
     this.className = className;
     this.methodName = methodName;
     this.description = description;
   }
 
-  public EventBag getNextEvent() {
+  public EventLogger getNextEvent() {
     return nextEvent;
   }
 
-  public void setNextEvent(EventBag nextEvent) {
+  public void setNextEvent(EventLogger nextEvent) {
     this.nextEvent = nextEvent;
   }
 

@@ -2,6 +2,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * KERNELLAND
@@ -30,6 +31,7 @@ public class PCB {
 
     timeoutsCounter = 0;
     messages = new ArrayList<>();
+    IntStream.range(0, OS.getMemoryMapSize()).forEach(i -> getMemoryMap()[i] = -1);
   }
 
   public int[] getMemoryMap() {

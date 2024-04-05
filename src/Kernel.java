@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.stream.IntStream;
 
@@ -19,8 +21,10 @@ public class Kernel implements Stoppable, Runnable, Device {
     IntStream.range(0, 3).forEach(i -> freeSpace[i] = false);
     IntStream.range(3, 6).forEach(i -> freeSpace[i] = true);
     IntStream.range(6, 9).forEach(i -> freeSpace[i] = false);
-    IntStream.range(9, 13).forEach(i -> freeSpace[i] = true);
-    IntStream.range(13, OS.getFreeSpaceSize()).forEach(i -> freeSpace[i] = false);
+    IntStream.range(9, 14).forEach(i -> freeSpace[i] = true);
+    IntStream.range(14, OS.getFreeSpaceSize()).forEach(i -> freeSpace[i] = false);
+
+    Arrays.fill(UserlandProcess.PHYSICAL_MEMORY, (byte) -1);
   }
 
   public boolean[] getFreeSpace() {
@@ -79,6 +83,7 @@ public class Kernel implements Stoppable, Runnable, Device {
     getScheduler().preSetCurrentlyRunning(pcb);
     OS.setRetValOnOS(pcb.getPid());
     getScheduler().startTimer();
+    getScheduler().populateTlbRand();
   }
 
   private void createProcess() {
@@ -135,20 +140,84 @@ public class Kernel implements Stoppable, Runnable, Device {
   }
 
   private void allocateMemory() {
-    int amountToAllocate = (int) OS.getParam(0);
-    OutputHelper.debugPrint("Allocating " + amountToAllocate + " bytes of memory");
+    int allocationSizeInBytes = (int) OS.getParam(0);
+    OutputHelper.debugPrint(
+        "Attempting to translate allocation size request "
+            + allocationSizeInBytes
+            + " from bytes to pages for "
+            + getCurrentlyRunningSafe().getThreadName());
+    if (allocationSizeInBytes % OS.getPageSize() == 0) {
+      int allocationSizeInPages = allocationSizeInBytes / OS.getPageSize();
+      OutputHelper.debugPrint(
+          "Attempting to allocate "
+              + allocationSizeInBytes
+              + " bytes of memory ("
+              + allocationSizeInPages
+              + " pages) for "
+              + getCurrentlyRunningSafe().getThreadName());
 
-    // Search UserlandProcess.PHYSICAL_MEMORY via Kernel.freeSpace for a contiguous block of size
-    // amountToAllocate.
-    int startingIdx =
-        IntStream.range(0, OS.getFreeSpaceSize())
-            .filter(i -> IntStream.range(i, i + amountToAllocate).allMatch(this::getFromFreeSpace))
-            .findFirst()
-            .orElse(-1);
+      // Search UserlandProcess.PHYSICAL_MEMORY for a contiguous block of size
+      // allocationSizeInBytes and store the start address.
+      int physicalAddress =
+          IntStream.range(0, OS.getPhysicalMemorySize())
+              .filter(
+                  i ->
+                      IntStream.range(i, i + allocationSizeInBytes)
+                          .allMatch(j -> UserlandProcess.preGetFromPhysicalMemory(j) == -1))
+              .findFirst()
+              .orElseGet(
+                  () -> {
+                    OutputHelper.debugPrint(
+                        "Failed to allocate due to insufficient space in physical memory.");
+                    return -1;
+                  });
+      var physicalPageNumbers = new ArrayList<Integer>();
+      IntStream.range(0, allocationSizeInPages)
+          .forEach(
+              i ->
+                  physicalPageNumbers.add(
+                      IntStream.range(0, OS.getFreeSpaceSize())
+                          .filter(this::getFromFreeSpace)
+                          .findFirst()
+                          .orElse(-1)));
+      if (physicalPageNumbers.stream().anyMatch(n -> n == -1)) {
+        OS.setRetValOnOS(-1);
+        return;
+      }
+      int virtualPageNumber =
+          IntStream.range(0, OS.getMemoryMapSize())
+              .filter(
+                  i ->
+                      IntStream.range(i, i + allocationSizeInPages)
+                          .allMatch(j -> getCurrentlyRunningSafe().getMemoryMap()[j] == -1))
+              .findFirst()
+              .orElseGet(
+                  () -> {
+                    OutputHelper.debugPrint(
+                        "Failed to allocate due to insufficient space in memory map.");
+                    return -1;
+                  });
+      IntStream.range(virtualPageNumber, allocationSizeInPages)
+          .forEach(i -> getCurrentlyRunningSafe().getMemoryMap()[i] = physicalPageNumbers.get(i));
+      getScheduler().populateTlb(virtualPageNumber, physicalPageNumbers.getFirst(), 0, 0);
+      OS.setRetValOnOS(virtualPageNumber * OS.getPageSize());
+    } else {
+      OutputHelper.debugPrint(
+          "Failed to translate due to invalid size value (not a multiple of OS.PAGE_SIZE).");
+      OS.setRetValOnOS(-2);
+    }
 
-    // Set OS.retVal to the starting index of this block.
-    OS.setRetValOnOS(startingIdx);
     getScheduler().switchProcess(getScheduler()::getRandFromWQ);
+  }
+
+  private void freeMemory() {
+    // TODO: Write this method.
+    throw new RuntimeException("freeMemory not implemented yet");
+  }
+
+  private void getMapping() {
+    // TODO: Write this method.
+    throw new RuntimeException("getMapping not implemented yet");
   }
 
   // ------------------------------------- FILESYSTEM METHODS -------------------------------------
@@ -217,6 +286,8 @@ public class Kernel implements Stoppable, Runnable, Device {
         case SEND_MESSAGE -> sendMessage();
         case WAIT_FOR_MESSAGE -> waitForMessage();
         case ALLOCATE_MEMORY -> allocateMemory();
+        case FREE_MEMORY -> freeMemory();
+        case GET_MAPPING -> getMapping();
       }
 
       // Start the new currentlyRunning.

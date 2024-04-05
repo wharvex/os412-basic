@@ -42,7 +42,7 @@ public class Scheduler {
     waitingRecipients = new ArrayList<>();
   }
 
-  public void populateTLB() {
+  public void populateTlbRand() {
     // Get random integers for zeroth and first virtual-to-physical mappings in the TLB.
     int vz = RandomHelper.getVirtPageNum();
     int pz = RandomHelper.getPhysPageNum();
@@ -55,6 +55,10 @@ public class Scheduler {
       pf = RandomHelper.getPhysPageNum();
     }
 
+    populateTlb(vz, pz, vf, pf);
+  }
+
+  public void populateTlb(int vz, int pz, int vf, int pf) {
     // Set zeroth mapping.
     UserlandProcess.preSetOnTlb(0, 0, vz);
     UserlandProcess.preSetOnTlb(1, 0, pz);
@@ -115,8 +119,6 @@ public class Scheduler {
   }
 
   public void switchProcess(Supplier<PCB> processChooser) {
-    populateTLB();
-
     handleMessages();
 
     // Add CR to WQ if CR is not null.

@@ -30,6 +30,10 @@ public class OS {
     return FREE_SPACE_SIZE;
   }
 
+  public static int getPhysicalMemorySize() {
+    return getPageSize() * getPageSize();
+  }
+
   public static int getTlbSize() {
     return TLB_SIZE;
   }
@@ -377,6 +381,21 @@ public class OS {
       BiConsumer<UnprivilegedContextSwitcher, Object> retSaver,
       int size) {
     switchContext(cs, CallType.ALLOCATE_MEMORY, retSaver, size);
+  }
+
+  public static void getMapping(
+      UnprivilegedContextSwitcher cs,
+      BiConsumer<UnprivilegedContextSwitcher, Object> retSaver,
+      int virtualPageNumber) {
+    switchContext(cs, CallType.GET_MAPPING, retSaver, virtualPageNumber);
+  }
+
+  public static void freeMemory(
+      UnprivilegedContextSwitcher cs,
+      BiConsumer<UnprivilegedContextSwitcher, Object> retSaver,
+      int pointer,
+      int size) {
+    switchContext(cs, CallType.FREE_MEMORY, retSaver, pointer, size);
   }
 
   public static List<KernelMessage> getMessages() {
