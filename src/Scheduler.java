@@ -207,7 +207,7 @@ public class Scheduler {
     return getWQ().get(idx);
   }
 
-  public PCB getRandFromWQ() {
+  public PCB getRandomProcess() {
     Random r = new Random();
     int chosenIdx = r.nextInt(getWQ().size());
     PCB chosenProcess = getFromWQ(chosenIdx);

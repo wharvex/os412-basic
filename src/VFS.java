@@ -1,7 +1,13 @@
 public class VFS implements Device {
+  private final FakeFileSystem ffs;
+
+  public VFS() {
+    ffs = new FakeFileSystem();
+  }
 
   @Override
   public int open(String s) {
+    if (s.equals("swap")) {}
     return 0;
   }
 

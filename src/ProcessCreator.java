@@ -7,6 +7,8 @@ public class ProcessCreator extends UserlandProcess {
   private final List<Integer> pongPids;
   private final List<Integer> pagingTestAPids;
   private final List<Integer> pagingTestBPids;
+  private final List<Integer> virtMemTestAPids;
+  private final List<Integer> virtMemTestBPids;
 
   public ProcessCreator() {
     super("0", "processCreator");
@@ -14,6 +16,16 @@ public class ProcessCreator extends UserlandProcess {
     pongPids = new ArrayList<>();
     pagingTestAPids = new ArrayList<>();
     pagingTestBPids = new ArrayList<>();
+    virtMemTestAPids = new ArrayList<>();
+    virtMemTestBPids = new ArrayList<>();
+  }
+
+  public List<Integer> getVirtMemTestAPids() {
+    return virtMemTestAPids;
+  }
+
+  public List<Integer> getVirtMemTestBPids() {
+    return virtMemTestBPids;
   }
 
   public List<Integer> getPagingTestAPids() {
@@ -104,6 +116,38 @@ public class ProcessCreator extends UserlandProcess {
     }
   }
 
+  private void testVirtualMemory(int iterationCounter) {
+    // Choose what to do based on iteration counter.
+    switch (iterationCounter) {
+      case 1:
+        // Create VirtMemTestA
+        OutputHelper.print("ProcessCreator creating VirtMemTestA");
+        OS.createProcess(
+            this,
+            new VirtMemTestA(),
+            Scheduler.PriorityType.INTERACTIVE,
+            (ucs, pid) -> ((ProcessCreator) ucs).addToVirtMemTestAPids((int) pid));
+        break;
+      case 2:
+        // Create VirtMemTestB.
+        OutputHelper.print("ProcessCreator creating VirtMemTestB");
+        OS.createProcess(
+            this,
+            new VirtMemTestB(),
+            Scheduler.PriorityType.INTERACTIVE,
+            (ucs, pid) -> ((ProcessCreator) ucs).addToVirtMemTestBPids((int) pid));
+        break;
+      default:
+        // Done.
+        OutputHelper.print("ProcessCreator says: I'm done setting up virtual memory testing.");
+        OutputHelper.print(
+            "ProcessCreator says: PagingTestA pid: " + getVirtMemTestAPids().getFirst());
+        OutputHelper.print(
+            "ProcessCreator says: PagingTestB pid: " + getVirtMemTestBPids().getFirst());
+        debugPrintOtherThreads();
+    }
+  }
+
   @Override
   void main() {
     int i = 0;
@@ -114,8 +158,11 @@ public class ProcessCreator extends UserlandProcess {
       // Test messages.
       // testMessages(i);
 
-      // Test memory.
-      testPaging(i);
+      // Test paging.
+      // testPaging(i);
+
+      // Test virtual memory.
+      testVirtualMemory(i);
 
       // Sleep and cooperate.
       ThreadHelper.threadSleep(1000);
@@ -153,5 +200,17 @@ public class ProcessCreator extends UserlandProcess {
     OutputHelper.debugPrint("Adding " + pid + " to pagingTestBPids");
     getPagingTestBPids().add(pid);
     OutputHelper.debugPrint("Contents of pagingTestBPids: " + getPagingTestBPids());
+  }
+
+  public void addToVirtMemTestAPids(int pid) {
+    OutputHelper.debugPrint("Adding " + pid + " to virtMemTestAPids");
+    getVirtMemTestAPids().add(pid);
+    OutputHelper.debugPrint("Contents of virtMemTestAPids: " + getVirtMemTestAPids());
+  }
+
+  public void addToVirtMemTestBPids(int pid) {
+    OutputHelper.debugPrint("Adding " + pid + " to virtMemTestBPids");
+    getVirtMemTestBPids().add(pid);
+    OutputHelper.debugPrint("Contents of virtMemTestBPids: " + getVirtMemTestBPids());
   }
 }

@@ -93,12 +93,12 @@ public class Kernel implements Stoppable, Runnable, Device {
     pcb.init();
     getScheduler().addToWQ(pcb);
     OS.setRetValOnOS(pcb.getPid());
-    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
+    getScheduler().switchProcess(getScheduler()::getRandomProcess);
   }
 
   private void switchProcess() {
     OS.setRetValOnOS(null);
-    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
+    getScheduler().switchProcess(getScheduler()::getRandomProcess);
   }
 
   private void sendMessage() {
@@ -115,7 +115,7 @@ public class Kernel implements Stoppable, Runnable, Device {
     OS.setRetValOnOS(null);
 
     // Give another process a chance to run.
-    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
+    getScheduler().switchProcess(getScheduler()::getRandomProcess);
   }
 
   private void waitForMessage() {
@@ -136,7 +136,7 @@ public class Kernel implements Stoppable, Runnable, Device {
     OS.setRetValOnOS(null);
 
     // Give another process a chance to run.
-    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
+    getScheduler().switchProcess(getScheduler()::getRandomProcess);
   }
 
   private void allocateMemory() {
@@ -207,7 +207,7 @@ public class Kernel implements Stoppable, Runnable, Device {
       OS.setRetValOnOS(-2);
     }
 
-    getScheduler().switchProcess(getScheduler()::getRandFromWQ);
+    getScheduler().switchProcess(getScheduler()::getRandomProcess);
   }
 
   private void freeMemory() {

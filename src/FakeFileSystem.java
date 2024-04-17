@@ -1,26 +1,30 @@
 import java.io.RandomAccessFile;
 
 public class FakeFileSystem implements Device {
-  private final RandomAccessFile[] randAccArr;
-  private final String filename;
+  private static final int FILES_SIZE = 50;
+  private final RandomAccessFile[] files;
 
-  public FakeFileSystem(String filename) {
+  public FakeFileSystem() {
+    files = new RandomAccessFile[FILES_SIZE];
+  }
+
+  public RandomAccessFile[] getFiles() {
+    return files;
+  }
+
+  @Override
+  public int open(String filename) {
     try {
-      if (filename.isEmpty() || filename.isBlank() || filename == null) {
+      if (filename == null || filename.isEmpty() || filename.isBlank()) {
         throw new RuntimeException(
             OutputHelper.getErrorString(
-                "FakeFileSystem constructor expected non-null, non-blank, non-empty filename string."));
+                "FakeFileSystem constructor expected non-null, non-empty, non-blank filename"
+                    + " string."));
       }
     } catch (RuntimeException e) {
       OutputHelper.writeToFile(e.toString());
       throw e;
     }
-    this.filename = filename;
-    randAccArr = new RandomAccessFile[10];
-  }
-
-  @Override
-  public int open(String s) {
     return 0;
   }
 
