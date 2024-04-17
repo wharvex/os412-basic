@@ -1,19 +1,63 @@
-/** Maps calls to the other devices */
+import java.util.Arrays;
+
+/** Coordinates calls to the secondary devices. */
 public class VFS implements Device {
-  private final FakeFileSystem ffs;
-  private final RandomDevice rd;
+  private final DeviceToIds[] deviceToIdsColl;
 
   public VFS() {
-    ffs = new FakeFileSystem();
-    rd = new RandomDevice();
+    deviceToIdsColl = new DeviceToIds[OS.EXISTING_SECONDARY_DEVICES];
+    addToDeviceToIdsColl(new FakeFileSystem());
+    addToDeviceToIdsColl(new RandomDevice());
   }
 
-  public RandomDevice getRd() {
-    return rd;
+  public DeviceToIds[] getDeviceToIdsColl() {
+    return deviceToIdsColl;
+  }
+
+  public DeviceToIds getFromDeviceToIdsCollByClass(Class<?> c) {
+    return Arrays.stream(getDeviceToIdsColl())
+        .filter(dti -> c.isInstance(dti.getDevice()))
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException(c.getName() + " DTI not found."));
+  }
+
+  public DeviceToIds getFromDeviceToIdsCollByIndex(int idx) {
+    return getDeviceToIdsColl()[idx];
+  }
+
+  public void addToDeviceToIdsColl(Device d) {
+    int idx =
+        MiscHelper.findNonNullIndex(
+            this::getFromDeviceToIdsCollByIndex, OS.EXISTING_SECONDARY_DEVICES);
+    if (idx < 0) {
+      throw new RuntimeException("Too many devices!");
+    }
+    getDeviceToIdsColl()[idx] = new DeviceToIds(d);
   }
 
   public FakeFileSystem getFfs() {
-    return ffs;
+    return (FakeFileSystem) getFromDeviceToIdsCollByClass(FakeFileSystem.class).getDevice();
+  }
+
+  public RandomDevice getRd() {
+    return (RandomDevice) getFromDeviceToIdsCollByClass(RandomDevice.class).getDevice();
+  }
+
+  public int getFromRdIds(int idx) {
+    return getFromDeviceToIdsCollByClass(RandomDevice.class).getIds()[idx];
+  }
+
+  public int getFromFfsIds(int idx) {
+    return getFromDeviceToIdsCollByClass(FakeFileSystem.class).getIds()[idx];
+  }
+
+  public int addToFfsIds(int id) {
+    int idx = MiscHelper.findNonNullIndex(this::getFromFfsIds, OS.DEVICE_CONTENTS_SIZE);
+    if (idx < 0) {
+      return idx;
+    }
+    getFromDeviceToIdsCollByClass(FakeFileSystem.class).getIds()[idx] = id;
+    return idx;
   }
 
   @Override
@@ -25,7 +69,13 @@ public class VFS implements Device {
     MiscHelper.enforceNonNullNonEmptyNonBlankString(openCode);
     MiscHelper.enforceNonNullNonEmptyNonBlankString(openArg);
     return switch (openCode) {
-      case "file" -> getFfs().open(openArg);
+      case "file" -> {
+        int result = getFfs().open(openArg);
+        if (result < 0) {
+          throw new RuntimeException("fail");
+        }
+        yield result;
+      }
       case "random" -> getRd().open(openArg);
       default -> -1;
     };

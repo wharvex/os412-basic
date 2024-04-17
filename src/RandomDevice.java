@@ -1,13 +1,10 @@
-import java.util.Objects;
 import java.util.Random;
-import java.util.stream.IntStream;
 
 public class RandomDevice implements Device {
-  private static final int GENERATORS_SIZE = 50;
   private final Random[] generators;
 
   public RandomDevice() {
-    generators = new Random[GENERATORS_SIZE];
+    generators = new Random[OS.DEVICE_CONTENTS_SIZE];
   }
 
   public Random[] getGenerators() {
@@ -19,11 +16,7 @@ public class RandomDevice implements Device {
   }
 
   public int addToGenerators(Random r) {
-    int idx =
-        IntStream.range(0, GENERATORS_SIZE)
-            .filter(i -> Objects.isNull(getFromGenerators(i)))
-            .findFirst()
-            .orElse(-1);
+    int idx = MiscHelper.findNonNullIndex(this::getFromGenerators, OS.DEVICE_CONTENTS_SIZE);
     if (idx < 0) {
       return idx;
     }

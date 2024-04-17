@@ -7,6 +7,8 @@ import java.util.function.BiConsumer;
  * <p>Models the gateway between userland and kernelland.
  */
 public class OS {
+  public static final int EXISTING_SECONDARY_DEVICES = 2;
+  public static final int DEVICE_CONTENTS_SIZE = 10;
   private static final int PAGE_SIZE = 1024;
   private static final int MEMORY_MAP_SIZE = 100;
   private static final int FREE_SPACE_SIZE = 1000;
@@ -426,6 +428,7 @@ public class OS {
     CREATE_PROCESS,
     SWITCH_PROCESS,
     SLEEP,
+    OPEN,
     WAIT_FOR_MESSAGE,
     SEND_MESSAGE,
     GET_MAPPING,

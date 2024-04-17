@@ -1,3 +1,7 @@
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+
 public class MiscHelper {
   public static void enforceNonNullNonEmptyNonBlankString(String s) {
     try {
@@ -21,5 +25,9 @@ public class MiscHelper {
       OutputHelper.writeToFile(OutputHelper.getErrorStringCatch(e));
       throw e;
     }
+  }
+
+  public static int findNonNullIndex(Function<Integer, Object> f, int size) {
+    return IntStream.range(0, size).filter(i -> Objects.isNull(f.apply(i))).findFirst().orElse(-1);
   }
 }

@@ -1,14 +1,11 @@
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
-import java.util.Objects;
-import java.util.stream.IntStream;
 
 public class FakeFileSystem implements Device {
-  private static final int FILES_SIZE = 50;
   private final RandomAccessFile[] files;
 
   public FakeFileSystem() {
-    files = new RandomAccessFile[FILES_SIZE];
+    files = new RandomAccessFile[OS.DEVICE_CONTENTS_SIZE];
   }
 
   public RandomAccessFile[] getFiles() {
@@ -21,11 +18,7 @@ public class FakeFileSystem implements Device {
 
   public int addToFiles(RandomAccessFile raf) {
     // Look for a null (free) index in files.
-    int idx =
-        IntStream.range(0, FILES_SIZE)
-            .filter(i -> Objects.isNull(getFromFiles(i)))
-            .findFirst()
-            .orElse(-1);
+    int idx = MiscHelper.findNonNullIndex(this::getFromFiles, OS.DEVICE_CONTENTS_SIZE);
 
     // If there is no free index, return the error code.
     if (idx < 0) {
