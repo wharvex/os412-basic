@@ -231,7 +231,7 @@ public class OS {
     try {
       if (Arrays.stream(newParams).anyMatch(Objects::isNull)) {
         throw new RuntimeException(
-            OutputHelper.getErrorString("Cannot add any null elements to params."));
+            OutputHelper.getErrorStringThrow("Cannot add any null elements to params."));
       }
     } catch (RuntimeException e) {
       OutputHelper.writeToFile(e.toString());
@@ -253,7 +253,7 @@ public class OS {
     try {
       if (idx < 0 || idx >= PARAMS.size()) {
         throw new RuntimeException(
-            OutputHelper.getErrorString("Param index " + idx + " out of range."));
+            OutputHelper.getErrorStringThrow("Param index " + idx + " out of range."));
       }
     } catch (RuntimeException e) {
       OutputHelper.writeToFile(e.toString());
@@ -267,7 +267,8 @@ public class OS {
     try {
       Objects.requireNonNull(
           param,
-          OutputHelper.getErrorString("Tried to get param at index " + idx + " but it was null."));
+          OutputHelper.getErrorStringThrow(
+              "Tried to get param at index " + idx + " but it was null."));
     } catch (NullPointerException e) {
       OutputHelper.writeToFile(e.toString());
       throw e;
@@ -320,7 +321,7 @@ public class OS {
     try {
       Objects.requireNonNull(
           contextSwitcher,
-          OutputHelper.getErrorString("Tried to get OS.contextSwitcher but it was null"));
+          OutputHelper.getErrorStringThrow("Tried to get OS.contextSwitcher but it was null"));
     } catch (NullPointerException e) {
       OutputHelper.writeToFile(e.toString());
       throw e;
@@ -332,7 +333,7 @@ public class OS {
   public static void setContextSwitcher(UnprivilegedContextSwitcher cs) {
     try {
       Objects.requireNonNull(
-          cs, OutputHelper.getErrorString("Cannot set OS.contextSwitcher to null"));
+          cs, OutputHelper.getErrorStringThrow("Cannot set OS.contextSwitcher to null"));
     } catch (NullPointerException e) {
       OutputHelper.writeToFile(e.toString());
       throw e;
@@ -344,7 +345,7 @@ public class OS {
   public static CallType getCallType() {
     try {
       Objects.requireNonNull(
-          callType, OutputHelper.getErrorString("Tried to get OS.callType but it was null"));
+          callType, OutputHelper.getErrorStringThrow("Tried to get OS.callType but it was null"));
     } catch (NullPointerException e) {
       OutputHelper.writeToFile(e.toString());
       throw e;
@@ -364,7 +365,8 @@ public class OS {
    */
   public static void setCallType(CallType ct) {
     try {
-      Objects.requireNonNull(ct, OutputHelper.getErrorString("Cannot set OS.callType to null."));
+      Objects.requireNonNull(
+          ct, OutputHelper.getErrorStringThrow("Cannot set OS.callType to null."));
     } catch (NullPointerException e) {
       OutputHelper.writeToFile(e.toString());
       throw e;

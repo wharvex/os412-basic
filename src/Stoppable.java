@@ -20,7 +20,7 @@ public interface Stoppable {
     try {
       if (Thread.currentThread() != getThread()) {
         throw new RuntimeException(
-            OutputHelper.getErrorString("Parking space reserved for " + getThreadName()));
+            OutputHelper.getErrorStringThrow("Parking space reserved for " + getThreadName()));
       }
     } catch (RuntimeException e) {
       OutputHelper.writeToFile(e.toString());

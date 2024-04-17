@@ -1,23 +1,40 @@
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.IntStream;
 
 public class RandomDevice implements Device {
-  private final Random[] randArr;
+  private static final int GENERATORS_SIZE = 50;
+  private final Random[] generators;
 
   public RandomDevice() {
-    randArr = new Random[10];
+    generators = new Random[GENERATORS_SIZE];
+  }
+
+  public Random[] getGenerators() {
+    return generators;
+  }
+
+  public Random getFromGenerators(int idx) {
+    return getGenerators()[idx];
+  }
+
+  public int addToGenerators(Random r) {
+    int idx =
+        IntStream.range(0, GENERATORS_SIZE)
+            .filter(i -> Objects.isNull(getFromGenerators(i)))
+            .findFirst()
+            .orElse(-1);
+    if (idx < 0) {
+      return idx;
+    }
+    getGenerators()[idx] = r;
+    return idx;
   }
 
   @Override
   public int open(String s) {
     int seed = Integer.parseInt(s);
-    randArr[
-            IntStream.range(0, randArr.length)
-                .filter(i -> randArr[i] == null)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("randArr full"))] =
-        new Random(seed);
-    return -1;
+    return addToGenerators(new Random(seed));
   }
 
   @Override

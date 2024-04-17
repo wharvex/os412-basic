@@ -4,6 +4,7 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 /** MAINLAND */
 public class OutputHelper {
@@ -74,8 +75,17 @@ public class OutputHelper {
     writeToFile(printStr);
   }
 
-  public static String getErrorString(String baseStr) {
-    return "\nERROR: " + baseStr;
+  public static String getErrorStringThrow(String baseStr) {
+    return "\nERROR in thread " + Thread.currentThread().getName() + ": " + baseStr;
+  }
+
+  public static String getErrorStringCatch(Exception e) {
+    return "\nERROR in thread "
+        + Thread.currentThread().getName()
+        + ": "
+        + e
+        + "\n"
+        + Arrays.toString(e.getStackTrace());
   }
 
   /**

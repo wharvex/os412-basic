@@ -241,8 +241,8 @@ public class Kernel implements Stoppable, Runnable, Device {
     int userlandID = getCurrentlyRunningSafe().getPid();
 
     int emptyPosition = getEmptyPosition();
-    int vfsID = vfs.open(s);
-    if (vfsID == -1) {
+    int vfsID = getVfs().open(s);
+    if (vfsID < 0) {
       throw new RuntimeException("VFS ID was -1: fail.");
     }
     fileManagerIntArr[emptyPosition] = vfsID;
