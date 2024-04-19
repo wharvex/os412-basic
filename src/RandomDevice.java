@@ -16,7 +16,7 @@ public class RandomDevice implements Device {
   }
 
   public int addToGenerators(Random r) {
-    int idx = MiscHelper.findNonNullIndex(this::getFromGenerators, OS.DEVICE_CONTENTS_SIZE);
+    int idx = MiscHelper.findNullIndex(this::getFromGenerators, OS.DEVICE_CONTENTS_SIZE);
     if (idx < 0) {
       return idx;
     }

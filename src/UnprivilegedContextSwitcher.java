@@ -1,5 +1,6 @@
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * MAINLAND
@@ -40,6 +41,10 @@ public interface UnprivilegedContextSwitcher extends Stoppable {
   default void setContextSwitchRet(
       BiConsumer<UnprivilegedContextSwitcher, Object> retSaver, Object ret) {
     retSaver.accept(this, ret);
+  }
+
+  default void setContextSwitchRet(Consumer<Object> retSaver, Object ret) {
+    retSaver.accept(ret);
   }
 
   @Override

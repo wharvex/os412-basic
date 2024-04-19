@@ -77,7 +77,7 @@ public class Scheduler {
                       OutputHelper.getErrorStringThrow(
                           "Expected Scheduler.currentlyRunning to not be null")));
     } catch (RuntimeException e) {
-      OutputHelper.writeToFile(e.toString());
+      OutputHelper.writeToFile(OutputHelper.getErrorStringCatch(e));
       throw e;
     }
   }

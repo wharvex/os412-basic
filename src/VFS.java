@@ -27,7 +27,7 @@ public class VFS implements Device {
 
   public void addToDeviceToIdsColl(Device d) {
     int idx =
-        MiscHelper.findNonNullIndex(
+        MiscHelper.findNullIndex(
             this::getFromDeviceToIdsCollByIndex, OS.EXISTING_SECONDARY_DEVICES);
     if (idx < 0) {
       throw new RuntimeException("Too many devices!");
@@ -52,7 +52,7 @@ public class VFS implements Device {
   }
 
   public int addToFfsIds(int id) {
-    int idx = MiscHelper.findNonNullIndex(this::getFromFfsIds, OS.DEVICE_CONTENTS_SIZE);
+    int idx = MiscHelper.findNegativeIndex(this::getFromFfsIds, OS.DEVICE_CONTENTS_SIZE);
     if (idx < 0) {
       return idx;
     }

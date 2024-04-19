@@ -1,8 +1,10 @@
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class FakeFileSystem implements Device {
   private final RandomAccessFile[] files;
+  int offset = 0;
 
   public FakeFileSystem() {
     files = new RandomAccessFile[OS.DEVICE_CONTENTS_SIZE];
@@ -18,7 +20,7 @@ public class FakeFileSystem implements Device {
 
   public int addToFiles(RandomAccessFile raf) {
     // Look for a null (free) index in files.
-    int idx = MiscHelper.findNonNullIndex(this::getFromFiles, OS.DEVICE_CONTENTS_SIZE);
+    int idx = MiscHelper.findNullIndex(this::getFromFiles, OS.DEVICE_CONTENTS_SIZE);
 
     // If there is no free index, return the error code.
     if (idx < 0) {
@@ -60,6 +62,11 @@ public class FakeFileSystem implements Device {
 
   @Override
   public int write(int id, byte[] data) {
-    return 0;
+    try {
+      getFromFiles(id).write(data, offset, OS.DEVICE_CONTENTS_SIZE);
+    } catch (IOException e) {
+      throw new RuntimeException("IOException");
+    }
+    return offset++;
   }
 }

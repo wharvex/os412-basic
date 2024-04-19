@@ -12,6 +12,8 @@ import java.util.stream.IntStream;
 public class PCB {
 
   private static int nextPid = 0;
+  private final int[] deviceContentsIds;
+  private final VirtualToPhysicalMapping[] v2ps;
   private final UserlandProcess userlandProcess;
   private final int pid;
   private final int[] memoryMap = new int[OS.getMemoryMapSize()];
@@ -32,6 +34,37 @@ public class PCB {
     timeoutsCounter = 0;
     messages = new ArrayList<>();
     IntStream.range(0, OS.getMemoryMapSize()).forEach(i -> getMemoryMap()[i] = -1);
+    deviceContentsIds = MiscHelper.makeIntArr(OS.DEVICE_CONTENTS_SIZE);
+    v2ps = new VirtualToPhysicalMapping[OS.DEVICE_CONTENTS_SIZE];
+  }
+
+  public VirtualToPhysicalMapping[] getV2ps() {
+    return v2ps;
+  }
+
+  public VirtualToPhysicalMapping getFromV2ps(int idx) {
+    return getV2ps()[idx];
+  }
+
+  public void addToV2ps(int idx, VirtualToPhysicalMapping v2p) {
+    getV2ps()[idx] = v2p;
+  }
+
+  public int[] getDeviceContentsIds() {
+    return deviceContentsIds;
+  }
+
+  public int getFromDeviceContentsIds(int idx) {
+    return getDeviceContentsIds()[idx];
+  }
+
+  public int addToDeviceContentsIds(int id) {
+    int idx = MiscHelper.findNegativeIndex(this::getFromDeviceContentsIds, OS.DEVICE_CONTENTS_SIZE);
+    if (idx < 0) {
+      return idx;
+    }
+    getDeviceContentsIds()[idx] = id;
+    return idx;
   }
 
   public int[] getMemoryMap() {
