@@ -220,14 +220,19 @@ public class Kernel implements Stoppable, Runnable, Device {
 
     // Find a block run of length ASIP in curRun's device.
     int[] curRunDev = getDeviceFromPidToDevice(getCurrentlyRunningSafe().getPid());
-    var runStream = IntStream.range(0, OS.DEVICE_CONTENTS_SIZE).filter(i -> curRunDev[i] < 0);
+    var runArr =
+        IntStream.range(0, OS.DEVICE_CONTENTS_SIZE).filter(i -> curRunDev[i] < 0).toArray();
 
     // If curRun doesn't have enough space, steal.
-    if (runStream.count() < allocationSizeInPages) {
+    if (runArr.length < allocationSizeInPages) {
       steal();
     }
 
+    // TODO: Use values in runArr as the indices in curRun.v2ps to fill with v2ps.
     var v2p = new VirtualToPhysicalMapping();
+
+    // TODO: Do this only if we didn't steal.
+    OS.setRetValOnOS(runArr.length > 0 ? runArr[0] : -1);
 
     getScheduler().switchProcess(getScheduler()::getRandomProcess);
   }

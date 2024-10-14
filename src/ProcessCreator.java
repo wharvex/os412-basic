@@ -141,9 +141,9 @@ public class ProcessCreator extends UserlandProcess {
         // Done.
         OutputHelper.print("ProcessCreator says: I'm done setting up virtual memory testing.");
         OutputHelper.print(
-            "ProcessCreator says: PagingTestA pid: " + getVirtMemTestAPids().getFirst());
+            "ProcessCreator says: VirtMemTestA pid: " + getVirtMemTestAPids().getFirst());
         OutputHelper.print(
-            "ProcessCreator says: PagingTestB pid: " + getVirtMemTestBPids().getFirst());
+            "ProcessCreator says: VirtMemTestB pid: " + getVirtMemTestBPids().getFirst());
         debugPrintOtherThreads();
     }
   }
