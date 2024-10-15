@@ -1,0 +1,295 @@
+<mxfile host="Electron" modified="2024-02-13T23:35:17.119Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.0.2 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="h8UG07inlULFlinhnKuP" version="23.0.2" type="device" pages="3">
+  <diagram id="xHq-G2nNNY88FInjmEsf" name="bootloader">
+    <mxGraphModel dx="345" dy="234" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="74vy9PuLSqIFxK0VMolw-1" value="bootThread&lt;br&gt;(BL.run)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="m3FpB1pASS_vKgpkQvoD-1" target="IXwELsF6nBWEIqCmyuRP-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="600" y="70" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Y9b6phSgzJmP65h4Pccd-5" value="mainThread&lt;br&gt;(main)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="m3FpB1pASS_vKgpkQvoD-1" target="Y9b6phSgzJmP65h4Pccd-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m3FpB1pASS_vKgpkQvoD-1" value="Create Bootloader&lt;br&gt;Start bootThread" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="370" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="UgENG1xYSzdf7ZHZsTTl-1" value="bootThread&lt;br&gt;(OS.startup)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="48eKtfhNQMVsrZNnKIUN-1" target="Q-t7BACvycwsvMukxX4C-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="903" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="48eKtfhNQMVsrZNnKIUN-1" value="Call OS.startup(), passing in &quot;this&quot; &lt;br&gt;(BL -- the TfpNL), PC, HW, IP, &amp;amp; their PTs" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="843" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bdjLXiEamLZFEHZowkno-1" value="kernelThread" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="Q-t7BACvycwsvMukxX4C-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1088" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KMp6M8FUyzW6pvCNLYBh-2" value="bootThread&lt;br&gt;(OS.startup)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="Q-t7BACvycwsvMukxX4C-1" target="KMp6M8FUyzW6pvCNLYBh-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Q-t7BACvycwsvMukxX4C-1" value="Create Kernel;&lt;br&gt;Start kernelThread" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="843" y="190" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="LgwH9vK9Rl0VfJJfgmvi-2" value="bootThread&lt;br&gt;(OS.tfStartupCreateProcess)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="KMp6M8FUyzW6pvCNLYBh-1" target="LgwH9vK9Rl0VfJJfgmvi-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KMp6M8FUyzW6pvCNLYBh-1" value="Call OS.tfStartup-CreateProcess(), passing in BL, PC, HW, IP, &amp;amp; their PTs" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="843" y="330" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ZoxBEM2yOf6uL2qVRc8b-1" value="bootThread&lt;br&gt;(OS.leaveTfpNote)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=120;entryDy=50;entryPerimeter=0;" parent="1" source="OWKbXW3nI-0AXzDTF5hr-1" target="N7daaSshGekGqEbo8A_n-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="668" y="700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="OWKbXW3nI-0AXzDTF5hr-1" value="Leave note&lt;br&gt;for Kernel&lt;br&gt;(W_tfpNote-1a)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+          <mxGeometry x="843" y="670" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="N7daaSshGekGqEbo8A_n-1" value="Release Kernel&#39;s Semaphore&lt;br&gt;(A1)" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;" parent="1" vertex="1">
+          <mxGeometry x="577" y="650" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bBmeAvhVWlGXrkOvcpTU-2" value="bootThread&lt;br&gt;(OS.leaveTfpNote)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=0;exitDy=30;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="N7daaSshGekGqEbo8A_n-1" target="IXwELsF6nBWEIqCmyuRP-3" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="418" y="700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IXwELsF6nBWEIqCmyuRP-2" value="bootThread&lt;br&gt;(BL.run)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="IXwELsF6nBWEIqCmyuRP-1" target="48eKtfhNQMVsrZNnKIUN-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IXwELsF6nBWEIqCmyuRP-1" value="&lt;font style=&quot;font-size: 9px;&quot;&gt;Create ProcessCreator (RealTime), HelloWorld (Interactive), and&amp;nbsp;IdleProcess (Background)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="602" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="LgwH9vK9Rl0VfJJfgmvi-6" value="bootThread&lt;br&gt;(OS.leaveTfpNote)&lt;br&gt;(B2)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="IXwELsF6nBWEIqCmyuRP-3" target="LgwH9vK9Rl0VfJJfgmvi-5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IXwELsF6nBWEIqCmyuRP-3" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;Park at Semaphore&lt;br&gt;(B0)&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
+          <mxGeometry x="350" y="650" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="LgwH9vK9Rl0VfJJfgmvi-4" value="bootThread&lt;br&gt;(OS.leaveTfpNote)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="LgwH9vK9Rl0VfJJfgmvi-1" target="OWKbXW3nI-0AXzDTF5hr-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LgwH9vK9Rl0VfJJfgmvi-1" value="Call OS.leaveTfpNote(), passing in BL, PC, HW, IP, PTs, &amp;amp; CT" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="843" y="490" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="LgwH9vK9Rl0VfJJfgmvi-5" value="&lt;font style=&quot;font-size: 9px;&quot;&gt;Call saveRetValTo-NoteLeaver(), passing&lt;br&gt;in AbstractRetVal&lt;br&gt;(R_tfpNote-1b)&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+          <mxGeometry x="90" y="670" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5Q5QURS6ASRmukzlyFTk-1" value="TF = Twin Function. Every method that has an OS version and a kernelland version and can be the subject of a tfpNote is a Twin Function, and its name should be prefixed by &quot;tf.&quot;&lt;br&gt;&lt;br&gt;TFP = Twin Function Protocol, i.e. the set of rules/conventions that govern the correspondence between Twin Functions.&lt;br&gt;&lt;br&gt;TfpNoteLeaver: Classes implement this interface to be able to leave a tfpNote in a predictable, thread-safe way. A TfpNoteLeaver is expected to have a semaphore and a thread, and to implement Runnable. The two classes that implement this interface (so far) are Bootloader and UserlandProcess.&lt;br&gt;&lt;br&gt;The OS.leaveTfpNote() method is declared synchronized, meaning if threadA enters this method, threadA now holds this method&#39;s &quot;lock&quot; (the OS class), and no other thread can enter this method (or any other method that requires the OS class as a lock) until threadA releases the lock by exiting the method." style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="75" y="130" width="180" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="5Q5QURS6ASRmukzlyFTk-2" value="W_tfpNote-1a = A (W)rite of the first (&quot;a&quot;) part of tfpNote-1, which is the part written by the TfpNoteLeaver." style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="824.5" y="745" width="157" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="5Q5QURS6ASRmukzlyFTk-3" value="R_tfpNote-1b = A (R)ead of the second (&quot;b&quot;) part of tfpNote-1, which is the part written by the Kernel." style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="75" y="750" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Y9b6phSgzJmP65h4Pccd-3" value="mainThread&lt;br&gt;(main)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Y9b6phSgzJmP65h4Pccd-2" target="m3FpB1pASS_vKgpkQvoD-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Y9b6phSgzJmP65h4Pccd-2" value="Main" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="140" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Y9b6phSgzJmP65h4Pccd-4" value="mainThread&lt;br&gt;Done" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="370" y="210" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Y9b6phSgzJmP65h4Pccd-6" value="Events that need thread safety to deal with tfpNote-1 will have this shape." style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="963" y="672.5" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="maHMTXF3R0Sc1G_31C9w-1" value="All semaphore parkings will have this shape" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="325" y="600" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="maHMTXF3R0Sc1G_31C9w-2" value="All semaphore releases will have this shape" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="582" y="600" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="oDGHsTKWMuwxUACZsLkg-2" value="This is the main mechanism that ensures thread safety when dealing with tfpNotes. A TfpNoteLeaver blocks OS.leaveTfpNote() for the duration of the TFC lifecycle (see next column) for that note. OS.leaveTfpNote() is the only method (other than OS.saveTfpNoteRetVal(), which is only called by the Kernel during its portion of the TFC lifecycle) that can alter the shared data area on OS that makes up a tfpNote. These policies ensure no one else can leave a note during the TFC lifecycle of a particular TfpNoteLeaver&#39;s note." style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="340" y="290" width="180" height="290" as="geometry" />
+        </mxCell>
+        <mxCell id="oDGHsTKWMuwxUACZsLkg-3" value="Twin Function Communication is communication between a TfpNoteLeaver and the Kernel &quot;about&quot; twin functions. In particular, this communication specifies the twin functions&#39; parameters, types, and return values.&lt;br&gt;&lt;br&gt;The TFC lifecycle for a tfpNote has four main stages:&lt;br&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;1. The TfpNoteLeaver leaves part &quot;a&quot; of the note for the Kernel, which specifies the parameters and call type.&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;2. The Kernel reads part &quot;a&quot; of the note and calls the kernelland twin.&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;3. The Kernel leaves part &quot;b&quot; of the note for the TfpNoteLeaver-- the return value of the kernelland twin.&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;4. The TfpNoteLeaver reads part &quot;b&quot; of the note.&lt;/span&gt;&lt;/div&gt;" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="610" y="150" width="180" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="mFwOtNXHYnpLlqTxyjls-1" value="PTs = Priority Types" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="843" y="5" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="mFwOtNXHYnpLlqTxyjls-2" value="CT = Call Type" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="973" y="505" width="100" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="Wf1nmlX5mPYGp5DaoT4d" name="kernel">
+    <mxGraphModel dx="863" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="1URBr2mmnncDK5aQ2cgx-1" value="bootThread&lt;br&gt;(OS.startup)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" target="1URBr2mmnncDK5aQ2cgx-2" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="189" y="10" as="sourcePoint" />
+            <mxPoint x="188.76" y="60" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tSHyz63xaPcPwllZvRBP-6" value="boot-&lt;br&gt;Thread&lt;br&gt;(OS.startup)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="1URBr2mmnncDK5aQ2cgx-2" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="30" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="1URBr2mmnncDK5aQ2cgx-2" value="Create Kernel;&lt;br&gt;Start kernelThread" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="128.76" y="70" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tSHyz63xaPcPwllZvRBP-4" value="kernelThread&lt;br&gt;(Kernel.kerSCP)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="GLPUdcSEiTIEfCRFFLB9-1" target="Cheabp2kHaFlm6afPPYF-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="727" y="90" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="GLPUdcSEiTIEfCRFFLB9-1" value="Switch on tfpNoteCallType&lt;br&gt;(R_tfpNote-1a)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+          <mxGeometry x="510" y="60" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Xl8fa29KfSVW6O2pKn4G-3" value="kernelThread&lt;br&gt;(Kernel.run)&lt;br&gt;(A2)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Xl8fa29KfSVW6O2pKn4G-1" target="GLPUdcSEiTIEfCRFFLB9-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Xl8fa29KfSVW6O2pKn4G-1" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;Park at Semaphore&lt;br&gt;(A0)&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
+          <mxGeometry x="340" y="50" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Xl8fa29KfSVW6O2pKn4G-2" value="kernel-&lt;br&gt;Thread&lt;br&gt;(Kernel.run)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="1URBr2mmnncDK5aQ2cgx-2" target="Xl8fa29KfSVW6O2pKn4G-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tSHyz63xaPcPwllZvRBP-8" value="kernelThread&lt;br&gt;(Scheduler.tf-&lt;br&gt;StartupCreateProcess)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="gaXkAy_bSfkkNI42sOe5-2" target="p4LBWBtaQKnxMURp8Zlc-2" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1010" y="120" as="sourcePoint" />
+            <mxPoint x="1009.9999999999998" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tSHyz63xaPcPwllZvRBP-5" value="kernelThread&lt;br&gt;(Kernel.kerSCP)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Cheabp2kHaFlm6afPPYF-1" target="gaXkAy_bSfkkNI42sOe5-2" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="847" y="90" as="sourcePoint" />
+            <mxPoint x="960" y="90" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gaXkAy_bSfkkNI42sOe5-2" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Call Scheduler.tfStart-upCreateProcess,&lt;br style=&quot;&quot;&gt;passing in&lt;br&gt;PC, HW, &amp;amp; IP&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="950" y="60" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-4" value="kernelThread&lt;br&gt;(Scheduler.tf-&lt;br&gt;StartupCreateProcess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="p4LBWBtaQKnxMURp8Zlc-2" target="p4LBWBtaQKnxMURp8Zlc-3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-2" value="&lt;font style=&quot;font-size: 9px;&quot;&gt;Create PCBs w/pids; &lt;br&gt;init their threads;&lt;br&gt;add them to their priority-appropriate waiting queues&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="950" y="210" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-6" value="kernelThread&lt;br&gt;(Scheduler.&lt;br&gt;startupSwitchProcess)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="p4LBWBtaQKnxMURp8Zlc-3" target="p4LBWBtaQKnxMURp8Zlc-10" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1010" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-3" value="Call Scheduler.startup-SwitchProcess" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="950" y="365" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-7" value="Are the waiting queues confined to the Kernel thread?" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="770" y="225" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-8" value="Not a Twin Function" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="770" y="380" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-13" value="kernelThread&lt;br&gt;(Scheduler.&lt;br&gt;startupSwitchProcess)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="p4LBWBtaQKnxMURp8Zlc-10" target="p4LBWBtaQKnxMURp8Zlc-12" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-10" value="Set Scheduler.&lt;br&gt;currently-&lt;br&gt;Running&lt;br&gt;to rtWQ[0] (PC)&lt;br&gt;(W_cr-1)" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+          <mxGeometry x="950" y="520" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-11" value="All events dealing with Scheduler.currentlyRunning will have this shape" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="770" y="537.5" width="170" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-15" value="kernelThread&lt;br&gt;(Kernel.kerSCP)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="p4LBWBtaQKnxMURp8Zlc-16" target="p4LBWBtaQKnxMURp8Zlc-14" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-12" value="Remove rtWQ[0]&lt;br&gt;from rtWQ" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="950" y="690" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-19" value="kernelThread&lt;br&gt;(Kernel.kerSCP)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="p4LBWBtaQKnxMURp8Zlc-14" target="p4LBWBtaQKnxMURp8Zlc-18" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-14" value="&lt;font style=&quot;font-size: 9px;&quot;&gt;Save pids returned&lt;br&gt;from Sched.startup-CreateProcess to note&lt;br&gt;(W_tfpNote-1b)&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+          <mxGeometry x="510" y="690" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-17" value="kernelThread&lt;br&gt;(Sched.start-&lt;br&gt;upCreate-&lt;br&gt;Process)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="p4LBWBtaQKnxMURp8Zlc-12" target="p4LBWBtaQKnxMURp8Zlc-16" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="950" y="720" as="sourcePoint" />
+            <mxPoint x="680" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-16" value="Return pids from Scheduler.startup-&lt;br&gt;CreateProcess" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="727" y="690" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vRNOTS-wPdi_VnUjix01-6" value="kernelThread&lt;br&gt;(Kernel.kerSCP)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="p4LBWBtaQKnxMURp8Zlc-18" target="vRNOTS-wPdi_VnUjix01-5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PaSA3yakD6CAwMtA_KQz-1" value="processCreatorThread" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="p4LBWBtaQKnxMURp8Zlc-18" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="349.66666666666674" y="830" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p4LBWBtaQKnxMURp8Zlc-18" value="Run Scheduler.&lt;br&gt;currently-&lt;br&gt;Running&lt;br&gt;(R_cr-1)" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+          <mxGeometry x="290" y="680" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vRNOTS-wPdi_VnUjix01-1" value="Release NoteLeaver&lt;br&gt;(B1)" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;" parent="1" vertex="1">
+          <mxGeometry x="80" y="520" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vRNOTS-wPdi_VnUjix01-2" value="Park&lt;br&gt;(A3)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
+          <mxGeometry x="110" y="355" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vRNOTS-wPdi_VnUjix01-4" value="kernelThread&lt;br&gt;(Kernel.run)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=50;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="vRNOTS-wPdi_VnUjix01-1" target="vRNOTS-wPdi_VnUjix01-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vRNOTS-wPdi_VnUjix01-8" value="timer-&lt;br&gt;Thread" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="vRNOTS-wPdi_VnUjix01-5" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="10" y="719.8571428571429" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vRNOTS-wPdi_VnUjix01-5" value="Start the Timer" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="80" y="690" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vRNOTS-wPdi_VnUjix01-7" value="kernelThread&lt;br&gt;(Kernel.run)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=70;entryDy=80;entryPerimeter=0;" parent="1" source="vRNOTS-wPdi_VnUjix01-5" target="vRNOTS-wPdi_VnUjix01-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Cheabp2kHaFlm6afPPYF-1" value="Verify params&lt;br&gt;(R_tfpNote-1a)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="727" y="60" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Cheabp2kHaFlm6afPPYF-2" value="Kernel.kerSCP = Kernel.kerStartupCreateProcess" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="540" y="20" width="300" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="smWOe6S2Ixz2HwubZ63B" name="processCreator">
+    <mxGraphModel dx="1036" dy="702" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="9KZJtVwGpwe2Hqm1Cw7q-1" value="pcThread&lt;br&gt;(pc.main)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="z27-AZNq44sTKWUpeHqF-1" target="M4vYGE2dnKsJZoS4hSpG-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="z27-AZNq44sTKWUpeHqF-1" value="Run Scheduler.&lt;br&gt;currently-&lt;br&gt;Running&lt;br&gt;(R_cr-1)" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+          <mxGeometry x="50" y="72" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="M4vYGE2dnKsJZoS4hSpG-1" value="kernelThread&lt;br&gt;(Kernel.run)" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" target="z27-AZNq44sTKWUpeHqF-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="109.5" y="10" as="sourcePoint" />
+            <mxPoint x="109.5" y="67" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="9KZJtVwGpwe2Hqm1Cw7q-4" value="pcThread&lt;br&gt;(pc.main)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="M4vYGE2dnKsJZoS4hSpG-2" target="9KZJtVwGpwe2Hqm1Cw7q-3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M4vYGE2dnKsJZoS4hSpG-2" value="Create SleepyRealtime" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="290" y="82" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="9KZJtVwGpwe2Hqm1Cw7q-3" value="Call OS.tfCreateProcess, passing in SR &amp;amp; PT.R" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="530" y="82" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="9KZJtVwGpwe2Hqm1Cw7q-5" value="PT.R = PriorityType.REALTIME" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="495" y="30" width="190" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
